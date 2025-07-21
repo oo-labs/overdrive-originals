@@ -29,10 +29,10 @@ export default defineType({
       name: 'link',
       title: 'Link (URL or Path)',
       type: 'string',
-      description: 'Accepts either full URL or relative path (e.g. /about)',
+      description: 'Accepts full URLs (https://) or relative paths (e.g. /about). Leave blank for no link.',
       validation: Rule =>
-        Rule.required().custom(link => {
-          if (!link) return 'Required'
+        Rule.custom(link => {
+          if (!link) return true // allow empty
           if (link.startsWith('/') || link.startsWith('http')) return true
           return 'Must start with "/" or "http"'
         })
@@ -51,7 +51,23 @@ export default defineType({
       name: 'order',
       title: 'Tile Display Order',
       type: 'number',
-      validation: Rule => Rule.integer().min(0)
+      validation: Rule => Rule.integer().min(0),
+      description: 'Higher numbers appear first, sorted left to right in rows'
+    }),
+    defineField({
+      name: 'statusBadge',
+      title: 'Status Badge',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Coming Soon', value: 'comingSoon' },
+          { title: 'New', value: 'new' },
+          { title: 'Updated', value: 'updated' },
+          { title: 'Limited', value: 'limited' }
+        ],
+        layout: 'dropdown'
+      },
+      description: 'Optional badge to display in tile (e.g. Coming Soon)'
     })
   ],
   preview: {
