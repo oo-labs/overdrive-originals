@@ -1,4 +1,4 @@
-import { defineType, defineField } from 'sanity'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'tile',
@@ -9,17 +9,12 @@ export default defineType({
       name: 'title',
       title: 'Title',
       type: 'string',
+      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'description',
       title: 'Description',
-      type: 'text',
-      rows: 2
-    }),
-    defineField({
-      name: 'link',
-      title: 'Link URL',
-      type: 'url',
+      type: 'string'
     }),
     defineField({
       name: 'slug',
@@ -27,46 +22,42 @@ export default defineType({
       type: 'slug',
       options: {
         source: 'title',
-        maxLength: 96,
-      },
+        maxLength: 96
+      }
     }),
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
+      name: 'link',
+      title: 'Link (URL or Path)',
+      type: 'string',
+      description: 'Accepts either full URL or relative path (e.g. /about)',
+      validation: Rule =>
+        Rule.required().custom(link => {
+          if (!link) return 'Required'
+          if (link.startsWith('/') || link.startsWith('http')) return true
+          return 'Must start with "/" or "http"'
+        })
     }),
     defineField({
       name: 'tileType',
       title: 'Tile Type',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Internal Page', value: 'internal' },
-          { title: 'External Link', value: 'external' },
-          { title: 'Video', value: 'video' },
-          { title: 'Collection', value: 'collection' },
-        ],
-      },
-    }),
-    defineField({
-      name: 'status',
-      title: 'Status',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Visible', value: 'visible' },
-          { title: 'Hidden', value: 'hidden' },
-        ],
-      },
+      type: 'string'
     }),
     defineField({
       name: 'colorTint',
-      title: 'Color Tint (HEX)',
-      type: 'string',
-      description: 'Hex color to tint the glass tile background (e.g. #00FFAA)'
+      title: 'Color Tint',
+      type: 'string'
+    }),
+    defineField({
+      name: 'order',
+      title: 'Tile Display Order',
+      type: 'number',
+      validation: Rule => Rule.integer().min(0)
     })
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'link'
+    }
+  }
 })
