@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -39,10 +41,10 @@ export default function RootLayout({
         <header className="fixed top-0 left-0 right-0 z-10">
           <div className="mx-auto max-w-6xl px-4 py-4">
             <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 backdrop-blur-md px-4 py-2 text-white">
-              <a href="/" className="inline-flex items-center gap-3">
-                <img src="/oo.svg" alt="Overdrive Originals" className="h-7 w-7" />
+              <Link href="/" className="inline-flex items-center gap-3">
+                <Image src="/oo.svg" alt="Overdrive Originals" width={28} height={28} />
                 <span className="text-lg font-semibold tracking-wide">Overdrive Originals</span>
-              </a>
+              </Link>
             </div>
           </div>
         </header>

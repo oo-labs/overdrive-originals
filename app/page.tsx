@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const youtubeUrl = process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://youtube.com";
@@ -18,25 +19,45 @@ export default function Home() {
       <section className="mt-6 sm:mt-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {tiles.map((tile) => (
-            <a
-              key={tile.title}
-              href={tile.href}
-              target={tile.external ? "_blank" : undefined}
-              rel={tile.external ? "noopener noreferrer" : undefined}
-              className={`glass group block p-5 sm:p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
-            >
-              <div className="flex items-center gap-3">
-                {tile.icon ? (
-                  <img src={tile.icon} alt="" className="h-6 w-6 opacity-90" />
-                ) : (
-                  <div className="h-6 w-6 rounded-md bg-white/20" />
-                )}
-                <div>
-                  <div className="text-white font-semibold tracking-wide">{tile.title}</div>
-                  <div className="text-white/70 text-sm">{tile.subtitle}</div>
+            tile.external ? (
+              <a
+                key={tile.title}
+                href={tile.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`glass group block p-5 sm:p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  {tile.icon ? (
+                    <Image src={tile.icon} alt="" width={24} height={24} className="opacity-90" />
+                  ) : (
+                    <div className="h-6 w-6 rounded-md bg-white/20" />
+                  )}
+                  <div>
+                    <div className="text-white font-semibold tracking-wide">{tile.title}</div>
+                    <div className="text-white/70 text-sm">{tile.subtitle}</div>
+                  </div>
                 </div>
-              </div>
-            </a>
+              </a>
+            ) : (
+              <Link
+                key={tile.title}
+                href={tile.href}
+                className={`glass group block p-5 sm:p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  {tile.icon ? (
+                    <Image src={tile.icon} alt="" width={24} height={24} className="opacity-90" />
+                  ) : (
+                    <div className="h-6 w-6 rounded-md bg-white/20" />
+                  )}
+                  <div>
+                    <div className="text-white font-semibold tracking-wide">{tile.title}</div>
+                    <div className="text-white/70 text-sm">{tile.subtitle}</div>
+                  </div>
+                </div>
+              </Link>
+            )
           ))}
         </div>
       </section>
