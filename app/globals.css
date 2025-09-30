@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Smooth fade for media */
+video { filter: saturate(1.05) contrast(1.05); }
+
+/* Utility: glass card default look (can be applied additionally) */
+.glass {
+  @apply rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md text-white shadow-[0_8px_30px_rgba(0,0,0,0.12)];
+}
