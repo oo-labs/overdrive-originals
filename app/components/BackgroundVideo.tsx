@@ -114,24 +114,34 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     nextVideoRef.current.currentTime = 0;
     nextVideoRef.current.play().catch(console.error);
     
-    // Wait a moment for the next video to start playing, then begin crossfade
-    setTimeout(() => {
-      // Set up crossfade transition - only fade out current video
-      if (currentVideoRef.current) {
-        currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
+    // Wait for the next video to actually start playing before beginning crossfade
+    const waitForVideoToPlay = () => {
+      if (nextVideoRef.current && nextVideoRef.current.readyState >= 3 && !nextVideoRef.current.paused) {
+        console.log('🔄 Next video is playing, starting crossfade');
         
-        // Force GPU acceleration
-        currentVideoRef.current.style.willChange = 'opacity';
-        
-        // Use requestAnimationFrame to ensure smooth transition start
-        requestAnimationFrame(() => {
-          // Only fade out the current video - next video is already visible and playing
-          if (currentVideoRef.current) {
-            currentVideoRef.current.style.opacity = '0';
-          }
-        });
+        // Set up crossfade transition - only fade out current video
+        if (currentVideoRef.current) {
+          currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
+          
+          // Force GPU acceleration
+          currentVideoRef.current.style.willChange = 'opacity';
+          
+          // Use requestAnimationFrame to ensure smooth transition start
+          requestAnimationFrame(() => {
+            // Only fade out the current video - next video is already visible and playing
+            if (currentVideoRef.current) {
+              currentVideoRef.current.style.opacity = '0';
+            }
+          });
+        }
+      } else {
+        // Check again in 50ms
+        setTimeout(waitForVideoToPlay, 50);
       }
-    }, 100); // Small delay to ensure next video is playing
+    };
+    
+    // Start checking for video readiness
+    setTimeout(waitForVideoToPlay, 50);
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
@@ -162,7 +172,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       
       setIsCrossfading(false);
       crossfadeTimeoutRef.current = null;
-    }, crossfadeDuration * 1000 + 100); // Add the 100ms delay we added earlier
+    }, crossfadeDuration * 1000 + 200); // Add buffer for video startup time
   }, [crossfadeDuration, isCrossfading]);
 
   // Handle current video events
@@ -192,7 +202,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           // For complete videos, start crossfade when video is near the end
           // Add buffer to ensure crossfade completes before video ends
           const timeUntilEnd = video.duration - video.currentTime;
-          const crossfadeBuffer = crossfadeDuration + 0.2; // Add 200ms buffer
+          const crossfadeBuffer = crossfadeDuration + 0.5; // Add 500ms buffer for video startup
           if (timeUntilEnd <= crossfadeBuffer && !isCrossfading) {
             console.log('⏰ Video near end, starting crossfade. Time until end:', timeUntilEnd, 'Crossfade duration:', crossfadeDuration, 'Buffer:', crossfadeBuffer);
             startCrossfadeFromEnd();
