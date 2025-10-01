@@ -80,14 +80,18 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     }
     
     // Check if next video is fully loaded and ready
-    if (nextVideoElement.readyState < 3) { // HAVE_FUTURE_DATA
-      console.log('🔄 Next video not ready, waiting for canplay event');
-      const handleCanPlay = () => {
-        nextVideoElement.removeEventListener('canplay', handleCanPlay);
-        console.log('🔄 Next video ready, starting crossfade');
+    console.log('🔄 Checking next video readiness. readyState:', nextVideoElement.readyState);
+    console.log('🔄 NetworkState:', nextVideoElement.networkState);
+    console.log('🔄 Buffered ranges:', nextVideoElement.buffered.length);
+    
+    if (nextVideoElement.readyState < 4) { // HAVE_ENOUGH_DATA
+      console.log('🔄 Next video not ready (readyState < 4), waiting for canplaythrough event');
+      const handleCanPlayThrough = () => {
+        nextVideoElement.removeEventListener('canplaythrough', handleCanPlayThrough);
+        console.log('🔄 Next video ready (canplaythrough), starting crossfade');
         performCrossfade();
       };
-      nextVideoElement.addEventListener('canplay', handleCanPlay);
+      nextVideoElement.addEventListener('canplaythrough', handleCanPlayThrough);
       return;
     }
     
@@ -154,6 +158,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       
       const handleLoadedData = () => {
         console.log('📹 Current video loaded:', currentVideo);
+        console.log('📹 Video readyState:', video.readyState, 'NetworkState:', video.networkState);
+        console.log('📹 Video duration:', video.duration);
         video.currentTime = 0;
         video.play().catch(console.error);
         
@@ -210,24 +216,58 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     }
   }, [currentVideo, videoDuration, crossfadeDuration, isCrossfading]);
 
-  // Handle next video loading
+  // Handle next video loading with comprehensive debugging
   useEffect(() => {
     console.log('🎯 Next video effect triggered. nextVideo:', nextVideo, 'isCrossfading:', isCrossfading);
     if (nextVideoRef.current && nextVideo && !isCrossfading) {
       const video = nextVideoRef.current;
       console.log('🎯 Next video element found, setting up event listener for:', nextVideo);
+      console.log('🎯 Video readyState:', video.readyState, 'NetworkState:', video.networkState);
+      console.log('🎯 Video src:', video.src);
       
       const handleLoadedData = () => {
-        // Next video is ready, set it to 50% opacity and prepare for crossfade
+        console.log('🎯 loadeddata event fired for:', nextVideo);
+        console.log('🎯 Video readyState after loadeddata:', video.readyState);
         video.style.opacity = '0.5';
         console.log('🎯 Next video loaded and ready:', nextVideo);
       };
 
+      const handleCanPlay = () => {
+        console.log('🎯 canplay event fired for:', nextVideo);
+        console.log('🎯 Video readyState after canplay:', video.readyState);
+      };
+
+      const handleCanPlayThrough = () => {
+        console.log('🎯 canplaythrough event fired for:', nextVideo);
+        console.log('🎯 Video readyState after canplaythrough:', video.readyState);
+      };
+
+      const handleLoadStart = () => {
+        console.log('🎯 loadstart event fired for:', nextVideo);
+      };
+
+      const handleProgress = () => {
+        if (video.buffered.length > 0) {
+          const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+          const duration = video.duration;
+          const percentBuffered = (bufferedEnd / duration) * 100;
+          console.log('🎯 Progress for', nextVideo, ':', percentBuffered.toFixed(1) + '% buffered');
+        }
+      };
+
       video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('canplaythrough', handleCanPlayThrough);
+      video.addEventListener('loadstart', handleLoadStart);
+      video.addEventListener('progress', handleProgress);
       
       return () => {
-        console.log('🎯 Cleaning up next video event listener for:', nextVideo);
+        console.log('🎯 Cleaning up next video event listeners for:', nextVideo);
         video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        video.removeEventListener('loadstart', handleLoadStart);
+        video.removeEventListener('progress', handleProgress);
       };
     }
   }, [nextVideo, isCrossfading]);
