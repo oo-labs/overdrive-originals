@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
+      <div className="grid grid-cols-3 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
         {tiles.map((tile) => {
           const tileClasses = `glass block aspect-square p-1 sm:p-2 ${
             tile.static 
@@ -39,13 +39,13 @@ export default function Home() {
                 />
               </div>
               <div className={`font-bold text-xs sm:text-sm lg:text-base tracking-wide mb-1 leading-tight ${
-                tile.static ? "text-white" : "tile-text text-white"
+                tile.static ? "text-white" : "tile-text"
               }`}>
                 {tile.title}
               </div>
               {tile.subtitle && (
                 <div className={`text-xs leading-tight ${
-                  tile.static ? "text-white/70" : "tile-subtitle text-white/70"
+                  tile.static ? "text-white/70" : "tile-subtitle"
                 }`}>
                   {tile.subtitle}
                 </div>

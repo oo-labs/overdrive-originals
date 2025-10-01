@@ -91,23 +91,41 @@ video {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Automotive interior lighting effects */
+/* Automotive interior lighting effects - text behaves like SVG */
 .tile-text {
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1);
 }
 
 .tile-button:hover .tile-text {
-  color: #22c55e !important;
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+  filter: 
+    brightness(0) 
+    invert(1) 
+    sepia(1) 
+    saturate(5) 
+    hue-rotate(90deg) 
+    brightness(1.2)
+    drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))
+    drop-shadow(0 0 16px rgba(34, 197, 94, 0.6))
+    drop-shadow(0 0 24px rgba(34, 197, 94, 0.4));
 }
 
 .tile-subtitle {
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1);
 }
 
 .tile-button:hover .tile-subtitle {
-  color: #16a34a !important;
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  filter: 
+    brightness(0) 
+    invert(1) 
+    sepia(1) 
+    saturate(5) 
+    hue-rotate(90deg) 
+    brightness(1.2)
+    drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))
+    drop-shadow(0 0 16px rgba(34, 197, 94, 0.6))
+    drop-shadow(0 0 24px rgba(34, 197, 94, 0.4));
 }
 
 /* Automotive SVG glow effect */
