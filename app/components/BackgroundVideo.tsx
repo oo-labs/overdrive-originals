@@ -1,45 +1,48 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface BackgroundVideoProps {
   videoDuration: number;
   crossfadeDuration: number;
 }
 
-// Available videos from /bg folder
-const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
-
-export default function BackgroundVideo({ videoDuration, crossfadeDuration }: BackgroundVideoProps) {
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
+export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [activeVideo, setActiveVideo] = useState<'video1' | 'video2'>('video1');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPreloading, setIsPreloading] = useState(true);
-  const [, setPreloadedVideos] = useState<Set<number>>(new Set());
-  const [video1Src, setVideo1Src] = useState<string>('');
-  const [video2Src, setVideo2Src] = useState<string>('');
+
+  // 5 explicit video sources
+  const video1Src = '/bg/bg_01.mp4';
+  const video2Src = '/bg/bg_02.mp4';
+  const video3Src = '/bg/bg_03.mp4';
+  const video4Src = '/bg/bg_04.mp4';
+  const video5Src = '/bg/bg_05.mp4';
+
+  const videoSources = useMemo(() => [video1Src, video2Src, video3Src, video4Src, video5Src], []);
 
   // Preload all videos
   const preloadVideos = useCallback(() => {
     console.log('🎬 Starting video preload...');
     
-    availableVideos.forEach((video, index) => {
+    let preloadedCount = 0;
+    
+    videoSources.forEach((src, index) => {
       const videoElement = document.createElement('video');
-      videoElement.src = `/bg/${video}`;
+      videoElement.src = src;
       videoElement.preload = 'auto';
       videoElement.muted = true;
       videoElement.crossOrigin = 'anonymous';
       
       const handleCanPlay = () => {
-        console.log(`✅ Preloaded: ${video}`);
-        setPreloadedVideos(prev => new Set([...prev, index]));
+        preloadedCount++;
+        console.log(`✅ Preloaded: bg_0${index + 1}.mp4`);
         
-        // Start playing first video when third video is preloaded
-        if (index === 2 && video1Ref.current) {
-          console.log('🎬 Starting first video playback');
-          setVideo1Src(`/bg/${availableVideos[0]}`);
+        // Start playing first video when all are preloaded
+        if (preloadedCount === videoSources.length && videoRef.current) {
+          console.log('🎬 All videos preloaded, starting playback');
+          videoRef.current.src = videoSources[0];
+          videoRef.current.play().catch(console.error);
           setIsPreloading(false);
         }
       };
@@ -47,129 +50,59 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       videoElement.addEventListener('canplay', handleCanPlay);
       videoElement.load();
     });
-  }, []);
+  }, [videoSources]);
 
   // Initialize preloading
   useEffect(() => {
     preloadVideos();
   }, [preloadVideos]);
 
-  // Handle video playback when source is set
-  useEffect(() => {
-    if (video1Src && video1Ref.current && !isPreloading) {
-      video1Ref.current.src = video1Src;
-      video1Ref.current.play().catch(console.error);
+  // Move to next video (instant cut)
+  const moveToNextVideo = useCallback(() => {
+    const nextIndex = (currentVideoIndex + 1) % videoSources.length;
+    console.log(`🔄 Instant cut to: bg_0${nextIndex + 1}.mp4`);
+    
+    if (videoRef.current) {
+      videoRef.current.src = videoSources[nextIndex];
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(console.error);
+      setCurrentVideoIndex(nextIndex);
     }
-  }, [video1Src, isPreloading]);
-
-  useEffect(() => {
-    if (video2Src && video2Ref.current && !isPreloading) {
-      video2Ref.current.src = video2Src;
-      video2Ref.current.currentTime = 0;
-    }
-  }, [video2Src, isPreloading]);
-
-  // Get next video index (cycles through availableVideos)
-  const getNextVideoIndex = useCallback(() => {
-    return (currentVideoIndex + 1) % availableVideos.length;
-  }, [currentVideoIndex]);
-
-  // Start transition to next video
-  const startTransition = useCallback(() => {
-    if (isTransitioning || isPreloading) return;
-    
-    const nextIndex = getNextVideoIndex();
-    const nextVideoSrc = availableVideos[nextIndex];
-    console.log('🔄 Starting transition to:', nextVideoSrc);
-    
-    setIsTransitioning(true);
-    
-    // Get current and next video elements
-    const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
-    const nextVideo = activeVideo === 'video1' ? video2Ref.current : video1Ref.current;
-    
-    if (!currentVideo || !nextVideo) return;
-    
-    // Set next video source
-    const nextVideoPath = `/bg/${nextVideoSrc}`;
-    if (activeVideo === 'video1') {
-      setVideo2Src(nextVideoPath);
-    } else {
-      setVideo1Src(nextVideoPath);
-    }
-    
-    // Wait for next video to be ready, then start playing and crossfade
-    const handleCanPlay = () => {
-      nextVideo.removeEventListener('canplay', handleCanPlay);
-      
-      // Start playing the next video
-      nextVideo.play().then(() => {
-        console.log('🎬 Next video started playing');
-        
-        // Start crossfade
-        currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
-        currentVideo.style.opacity = '0';
-        
-        // After crossfade completes
-        setTimeout(() => {
-          console.log('✅ Transition complete');
-          
-          // Switch active video and update index
-          setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
-          setCurrentVideoIndex(nextIndex);
-          setIsTransitioning(false);
-          
-          // Reset current video for next transition
-          currentVideo.style.transition = '';
-          currentVideo.style.opacity = '1';
-        }, crossfadeDuration * 1000);
-      }).catch((error) => {
-        console.error('❌ Failed to play next video:', error);
-        setIsTransitioning(false);
-      });
-    };
-    
-    // Add event listener after a short delay to ensure src is set
-    setTimeout(() => {
-      if (nextVideo.src) {
-        nextVideo.addEventListener('canplay', handleCanPlay);
-      }
-    }, 100);
-  }, [isTransitioning, isPreloading, getNextVideoIndex, crossfadeDuration, activeVideo]);
+  }, [currentVideoIndex, videoSources]);
 
   // Handle video events
   useEffect(() => {
-    const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
+    const currentVideo = videoRef.current;
     if (!currentVideo || isPreloading) return;
     
     const handleTimeUpdate = () => {
       if (videoDuration === 0) {
-        // For complete videos, start transition when near the end
+        // For complete videos, cut when near the end
         const timeUntilEnd = currentVideo.duration - currentVideo.currentTime;
-        const transitionBuffer = crossfadeDuration + 0.5; // 500ms buffer
-        if (timeUntilEnd <= transitionBuffer && !isTransitioning) {
-          console.log('⏰ Video near end, starting transition');
-          startTransition();
+        const cutBuffer = 0.1; // 100ms buffer for instant cut
+        if (timeUntilEnd <= cutBuffer) {
+          console.log('⏰ Video near end, instant cut');
+          moveToNextVideo();
         }
       } else {
-        // For timed videos, start transition when time is up
-        if (currentVideo.currentTime >= videoDuration && !isTransitioning) {
-          console.log('⏰ Video duration reached, starting transition');
-          startTransition();
+        // For timed videos, cut when time is up
+        if (currentVideo.currentTime >= videoDuration) {
+          console.log('⏰ Video duration reached, instant cut');
+          moveToNextVideo();
         }
       }
     };
     
     const handleEnded = () => {
-      if (videoDuration === 0 && !isTransitioning) {
-        console.log('📹 Video ended naturally, starting transition');
-        startTransition();
+      if (videoDuration === 0) {
+        console.log('📹 Video ended naturally, instant cut');
+        moveToNextVideo();
       }
     };
     
     const handleError = (e: Event) => {
       console.error('❌ Video error:', e);
-      startTransition();
+      moveToNextVideo();
     };
     
     currentVideo.addEventListener('timeupdate', handleTimeUpdate);
@@ -181,7 +114,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       currentVideo.removeEventListener('ended', handleEnded);
       currentVideo.removeEventListener('error', handleError);
     };
-  }, [activeVideo, isPreloading, videoDuration, crossfadeDuration, isTransitioning, startTransition]);
+  }, [isPreloading, videoDuration, moveToNextVideo]);
 
   return (
     <div className="relative h-full w-full">
@@ -192,10 +125,10 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         </div>
       )}
       
-      {/* Video 1 */}
+      {/* Single video element */}
       <video
-        ref={video1Ref}
-        key={`video1-${video1Src}`}
+        ref={videoRef}
+        key={`video-${currentVideoIndex}`}
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
@@ -205,34 +138,10 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         crossOrigin="anonymous"
         poster="/bg-poster.jpg"
         style={{ 
-          zIndex: activeVideo === 'video1' ? 2 : 1,
-          opacity: activeVideo === 'video1' ? 1 : 0,
-          willChange: 'opacity',
+          willChange: 'auto',
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden'
         }}
-        src={video1Src}
-      />
-      
-      {/* Video 2 */}
-      <video
-        ref={video2Ref}
-        key={`video2-${video2Src}`}
-        className="absolute inset-0 h-full w-full object-cover"
-        muted
-        playsInline
-        loop={false}
-        preload="auto"
-        crossOrigin="anonymous"
-        poster="/bg-poster.jpg"
-        style={{ 
-          zIndex: activeVideo === 'video2' ? 2 : 1,
-          opacity: activeVideo === 'video2' ? 1 : 0,
-          willChange: 'opacity',
-          transform: 'translateZ(0)',
-          backfaceVisibility: 'hidden'
-        }}
-        src={video2Src}
       />
     </div>
   );
