@@ -30,5 +30,5 @@ video { filter: saturate(1.05) contrast(1.05); }
 
 /* Utility: glass card default look (can be applied additionally) */
 .glass {
-  @apply rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md text-white shadow-[0_8px_30px_rgba(0,0,0,0.12)];
+  @apply rounded-xl border border-white/20 bg-white/5 backdrop-blur-lg text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] border-t-white/30;
 }
