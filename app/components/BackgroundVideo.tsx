@@ -23,23 +23,39 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     // Filter out the current video to avoid immediate repeats
     const otherVideos = availableVideos.filter(video => video !== currentVideoName);
     const randomVideo = otherVideos[Math.floor(Math.random() * otherVideos.length)];
-    console.log('Selected next video:', randomVideo, 'avoiding current:', currentVideoName);
+    console.log('🎬 getNextVideo called with current:', currentVideoName);
+    console.log('🎬 Available videos:', availableVideos);
+    console.log('🎬 Other videos (excluding current):', otherVideos);
+    console.log('🎬 Selected next video:', randomVideo);
     return randomVideo;
   };
 
   // Start crossfade from video end
   const startCrossfadeFromEnd = () => {
-    if (isCrossfading || !currentVideoRef.current || !nextVideoRef.current) return;
+    console.log('🔄 startCrossfadeFromEnd called');
+    console.log('🔄 isCrossfading:', isCrossfading);
+    console.log('🔄 currentVideoRef.current:', !!currentVideoRef.current);
+    console.log('🔄 nextVideoRef.current:', !!nextVideoRef.current);
+    console.log('🔄 nextVideo state:', nextVideo);
+    
+    if (isCrossfading || !currentVideoRef.current || !nextVideoRef.current) {
+      console.log('🔄 Crossfade blocked - conditions not met');
+      return;
+    }
     
     const currentVideoElement = currentVideoRef.current;
     const nextVideoElement = nextVideoRef.current;
     const nextVideoName = nextVideo; // Store the next video name
     
-    console.log('Starting crossfade from video end, duration:', crossfadeDuration);
+    console.log('🔄 Starting crossfade from video end, duration:', crossfadeDuration);
+    console.log('🔄 Current video element:', currentVideoElement.src);
+    console.log('🔄 Next video element:', nextVideoElement.src);
+    console.log('🔄 Next video name:', nextVideoName);
     
     setIsCrossfading(true);
     
     // Start the next video playing
+    console.log('🔄 Starting next video playback');
     nextVideoElement.currentTime = 0;
     nextVideoElement.play().catch(console.error);
     
@@ -50,20 +66,24 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     // Start fade out of current video and fade in of next video
     currentVideoElement.style.opacity = '0';
     nextVideoElement.style.opacity = '1';
+    console.log('🔄 Crossfade started - current fading out, next fading in');
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
-      console.log('Crossfade complete, switching videos. Current:', nextVideoName);
+      console.log('✅ Crossfade complete, switching videos. Current:', nextVideoName);
+      console.log('✅ Setting currentVideo to:', nextVideoName);
       
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
       
       // Get the next video after this one (avoiding the current video)
+      console.log('✅ Getting next video after crossfade...');
       const nextNextVideo = getNextVideo(nextVideoName);
+      console.log('✅ Setting nextVideo to:', nextNextVideo);
       setNextVideo(nextNextVideo);
-      console.log('Next video after crossfade:', nextNextVideo);
       
       setIsCrossfading(false);
+      console.log('✅ Crossfade complete, isCrossfading set to false');
       
       // Reset styles
       if (currentVideoRef.current) {
@@ -83,13 +103,16 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       const video = currentVideoRef.current;
       
       const handleLoadedData = () => {
+        console.log('📹 Current video loaded:', currentVideo);
         video.currentTime = 0;
         video.play().catch(console.error);
         
         // Pre-load the next video (avoiding the current video)
+        console.log('📹 Getting next video for current:', currentVideo);
         const nextVideoName = getNextVideo(currentVideo);
+        console.log('📹 Setting nextVideo state to:', nextVideoName);
         setNextVideo(nextVideoName);
-        console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
+        console.log('📹 Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
       };
 
       const handleTimeUpdate = () => {
@@ -97,13 +120,13 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           // For complete videos, start crossfade when video is near the end
           const timeUntilEnd = video.duration - video.currentTime;
           if (timeUntilEnd <= crossfadeDuration && !isCrossfading) {
-            console.log('Video near end, starting crossfade');
+            console.log('⏰ Video near end, starting crossfade. Time until end:', timeUntilEnd, 'Crossfade duration:', crossfadeDuration);
             startCrossfadeFromEnd();
           }
         } else {
           // For timed videos, start crossfade when time is up
           if (video.currentTime >= videoDuration && !isCrossfading) {
-            console.log('Video duration reached, starting crossfade');
+            console.log('⏰ Video duration reached, starting crossfade. Current time:', video.currentTime, 'Duration:', videoDuration);
             startCrossfadeFromEnd();
           }
         }
@@ -140,18 +163,21 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Handle next video loading
   useEffect(() => {
+    console.log('🎯 Next video effect triggered. nextVideo:', nextVideo, 'isCrossfading:', isCrossfading);
     if (nextVideoRef.current && nextVideo && !isCrossfading) {
       const video = nextVideoRef.current;
+      console.log('🎯 Next video element found, setting up event listener for:', nextVideo);
       
       const handleLoadedData = () => {
         // Next video is ready, set it to 50% opacity and prepare for crossfade
         video.style.opacity = '0.5';
-        console.log('Next video loaded and ready:', nextVideo);
+        console.log('🎯 Next video loaded and ready:', nextVideo);
       };
 
       video.addEventListener('loadeddata', handleLoadedData);
       
       return () => {
+        console.log('🎯 Cleaning up next video event listener for:', nextVideo);
         video.removeEventListener('loadeddata', handleLoadedData);
       };
     }
@@ -160,8 +186,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   // Initialize with first video
   useEffect(() => {
     const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+    console.log('🚀 Initializing with first video:', firstVideo);
     setCurrentVideo(firstVideo);
-    console.log('Initialized with video:', firstVideo);
+    console.log('🚀 Initialized with video:', firstVideo);
   }, []);
 
   return (
