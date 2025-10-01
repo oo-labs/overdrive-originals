@@ -148,24 +148,24 @@ export default function RootLayout({
         </div>
 
         {/* Floating brand logo - viewport top */}
-        <header className="fixed top-8 left-0 right-0 z-10">
+        <header className="fixed top-4 sm:top-8 left-0 right-0 z-10">
           <div className="flex justify-center">
-            <Link href="/" className="text-white hover:opacity-80 transition-opacity p-8 block">
-              <Image src="/oo.svg" alt="Overdrive Originals" width={192} height={192} />
+            <Link href="/" className="text-white hover:opacity-80 transition-opacity p-4 sm:p-8 block">
+              <Image src="/oo.svg" alt="Overdrive Originals" width={154} height={154} className="w-[154px] h-[154px] sm:w-[192px] sm:h-[192px]" />
             </Link>
           </div>
         </header>
 
         {/* Page content - full viewport height */}
         <div className="min-h-screen flex flex-col">
-          <div className="flex-1 flex items-center justify-center pt-24 pb-24 sm:pt-32 sm:pb-32">
+          <div className="flex-1 flex items-center justify-center pt-32 pb-24 sm:pt-32 sm:pb-32">
             {children}
           </div>
         </div>
 
         {/* Footer - viewport bottom */}
         <footer className="fixed bottom-4 sm:bottom-8 left-0 right-0 z-10">
-          <div className="text-center text-white/70 text-xs sm:text-sm leading-relaxed px-4">
+          <div className="text-center text-white/70 text-[10px] sm:text-sm leading-relaxed px-4">
             © {new Date().getFullYear()} Overdrive Originals. All rights reserved.
             <br />
             This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
