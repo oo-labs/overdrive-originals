@@ -32,6 +32,10 @@ video {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   -webkit-transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: opacity;
+  isolation: isolate;
 }
 
 /* Utility: glass card default look (can be applied additionally) */
