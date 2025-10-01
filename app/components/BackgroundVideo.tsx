@@ -64,7 +64,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
-      console.log('Crossfade complete, switching videos');
+      console.log('Crossfade complete, switching videos. Current:', nextVideoName, 'Played videos:', playedVideosRef.current);
       
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
@@ -72,6 +72,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // Get the next video after this one
       const nextNextVideo = getNextVideo();
       setNextVideo(nextNextVideo);
+      console.log('Next video after crossfade:', nextNextVideo, 'Played videos after:', playedVideosRef.current);
       
       setIsCrossfading(false);
       
@@ -99,7 +100,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         // Pre-load the next video
         const nextVideoName = getNextVideo();
         setNextVideo(nextVideoName);
-        console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
+        console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName, 'Played videos:', playedVideosRef.current);
       };
 
       const handleTimeUpdate = () => {
