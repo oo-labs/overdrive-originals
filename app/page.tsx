@@ -4,7 +4,6 @@ export default function Home() {
   const youtubeUrl = process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://youtube.com";
   const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com";
   const tiles = [
-    { href: "/", title: "Home", subtitle: "", icon: "🏠", external: false },
     { href: "/about", title: "About", subtitle: "", icon: "ℹ️", external: false },
     { href: "/race-support", title: "Race Support", subtitle: "E53 4.8is Build", icon: "🏁", external: false },
     { href: "/second-chance-customs", title: "Second Chance", subtitle: "Coming Soon", icon: "🔧", external: false, comingSoon: true },
