@@ -23,8 +23,8 @@ export default function Home() {
               : "tile-glow tile-button group hover:scale-110 active:scale-95"
           }`;
           
-          const iconClasses = `w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 filter drop-shadow-lg ${
-            tile.static ? "opacity-60" : "opacity-80 group-hover:opacity-100 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)] transition-all duration-300"
+          const iconClasses = `w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 ${
+            tile.static ? "opacity-60" : "tile-svg opacity-80 group-hover:opacity-100 group-hover:scale-110"
           }`;
           
           const tileContent = (
@@ -38,11 +38,15 @@ export default function Home() {
                   className="w-full h-full object-contain brightness-0 invert"
                 />
               </div>
-              <div className="text-white font-bold text-xs sm:text-sm lg:text-base tracking-wide mb-1 leading-tight">
+              <div className={`font-bold text-xs sm:text-sm lg:text-base tracking-wide mb-1 leading-tight ${
+                tile.static ? "text-white" : "tile-text text-white"
+              }`}>
                 {tile.title}
               </div>
               {tile.subtitle && (
-                <div className="text-white/70 text-xs leading-tight">
+                <div className={`text-xs leading-tight ${
+                  tile.static ? "text-white/70" : "tile-subtitle text-white/70"
+                }`}>
                   {tile.subtitle}
                 </div>
               )}
