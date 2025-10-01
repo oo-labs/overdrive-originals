@@ -7,10 +7,12 @@ interface BackgroundVideoProps {
   crossfadeDuration: number;
 }
 
-export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoProps) {
+  const video1Ref = useRef<HTMLVideoElement>(null);
+  const video2Ref = useRef<HTMLVideoElement>(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPreloading, setIsPreloading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<'video1' | 'video2'>('video1');
 
   // 5 explicit video sources
   const video1Src = '/bg/bg_01.mp4';
@@ -39,10 +41,12 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
         console.log(`✅ Preloaded: bg_0${index + 1}.mp4`);
         
         // Start playing first video when all are preloaded
-        if (preloadedCount === videoSources.length && videoRef.current) {
+        if (preloadedCount === videoSources.length) {
           console.log('🎬 All videos preloaded, starting playback');
-          videoRef.current.src = videoSources[0];
-          videoRef.current.play().catch(console.error);
+          if (video1Ref.current) {
+            video1Ref.current.src = videoSources[0];
+            video1Ref.current.play().catch(console.error);
+          }
           setIsPreloading(false);
         }
       };
@@ -57,64 +61,73 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
     preloadVideos();
   }, [preloadVideos]);
 
-  // Move to next video (instant cut)
-  const moveToNextVideo = useCallback(() => {
+  // Ping-pong to next video
+  const pingPongToNext = useCallback(() => {
     const nextIndex = (currentVideoIndex + 1) % videoSources.length;
-    console.log(`🔄 Instant cut to: bg_0${nextIndex + 1}.mp4`);
+    const nextVideoSrc = videoSources[nextIndex];
+    console.log(`🔄 Ping-pong to: bg_0${nextIndex + 1}.mp4`);
     
-    if (videoRef.current) {
-      videoRef.current.src = videoSources[nextIndex];
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(console.error);
-      setCurrentVideoIndex(nextIndex);
-    }
-  }, [currentVideoIndex, videoSources]);
+    // Get current and next video elements
+    const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
+    const nextVideo = activeVideo === 'video1' ? video2Ref.current : video1Ref.current;
+    
+    if (!currentVideo || !nextVideo) return;
+    
+    // Set next video source and start playing
+    nextVideo.src = nextVideoSrc;
+    nextVideo.currentTime = 0;
+    nextVideo.play().catch(console.error);
+    
+    // Wait for next video to start playing, then fade
+    const handleCanPlay = () => {
+      nextVideo.removeEventListener('canplay', handleCanPlay);
+      
+      console.log('🎬 Next video started playing, starting fade');
+      
+      // Fade out current video
+      currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
+      currentVideo.style.opacity = '0';
+      
+      // After fade completes, switch active video
+      setTimeout(() => {
+        console.log('✅ Ping-pong complete');
+        
+        // Switch active video
+        setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
+        setCurrentVideoIndex(nextIndex);
+        
+        // Reset current video for next ping-pong
+        currentVideo.style.transition = '';
+        currentVideo.style.opacity = '1';
+      }, crossfadeDuration * 1000);
+    };
+    
+    nextVideo.addEventListener('canplay', handleCanPlay);
+  }, [currentVideoIndex, videoSources, activeVideo, crossfadeDuration]);
 
   // Handle video events
   useEffect(() => {
-    const currentVideo = videoRef.current;
+    const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
     if (!currentVideo || isPreloading) return;
     
-    const handleTimeUpdate = () => {
-      if (videoDuration === 0) {
-        // For complete videos, cut when near the end
-        const timeUntilEnd = currentVideo.duration - currentVideo.currentTime;
-        const cutBuffer = 0.1; // 100ms buffer for instant cut
-        if (timeUntilEnd <= cutBuffer) {
-          console.log('⏰ Video near end, instant cut');
-          moveToNextVideo();
-        }
-      } else {
-        // For timed videos, cut when time is up
-        if (currentVideo.currentTime >= videoDuration) {
-          console.log('⏰ Video duration reached, instant cut');
-          moveToNextVideo();
-        }
-      }
-    };
-    
     const handleEnded = () => {
-      if (videoDuration === 0) {
-        console.log('📹 Video ended naturally, instant cut');
-        moveToNextVideo();
-      }
+      console.log('📹 Video ended naturally, ping-pong');
+      pingPongToNext();
     };
     
     const handleError = (e: Event) => {
       console.error('❌ Video error:', e);
-      moveToNextVideo();
+      pingPongToNext();
     };
     
-    currentVideo.addEventListener('timeupdate', handleTimeUpdate);
     currentVideo.addEventListener('ended', handleEnded);
     currentVideo.addEventListener('error', handleError);
     
     return () => {
-      currentVideo.removeEventListener('timeupdate', handleTimeUpdate);
       currentVideo.removeEventListener('ended', handleEnded);
       currentVideo.removeEventListener('error', handleError);
     };
-  }, [isPreloading, videoDuration, moveToNextVideo]);
+  }, [isPreloading, activeVideo, pingPongToNext]);
 
   return (
     <div className="relative h-full w-full">
@@ -125,20 +138,39 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
         </div>
       )}
       
-      {/* Single video element */}
+      {/* Video 1 - Background layer */}
       <video
-        ref={videoRef}
-        key={`video-${currentVideoIndex}`}
+        ref={video1Ref}
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
-        autoPlay
         loop={false}
         preload="auto"
         crossOrigin="anonymous"
         poster="/bg-poster.jpg"
         style={{ 
-          willChange: 'auto',
+          zIndex: activeVideo === 'video1' ? 2 : 1,
+          opacity: activeVideo === 'video1' ? 1 : 0,
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}
+      />
+      
+      {/* Video 2 - Background layer */}
+      <video
+        ref={video2Ref}
+        className="absolute inset-0 h-full w-full object-cover"
+        muted
+        playsInline
+        loop={false}
+        preload="auto"
+        crossOrigin="anonymous"
+        poster="/bg-poster.jpg"
+        style={{ 
+          zIndex: activeVideo === 'video2' ? 2 : 1,
+          opacity: activeVideo === 'video2' ? 1 : 0,
+          willChange: 'opacity',
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden'
         }}
