@@ -26,13 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const videoDuration = parseFloat(process.env.NEXT_PUBLIC_BG_VIDEO_DURATION || "6.0");
+  const crossfadeDuration = parseFloat(process.env.NEXT_PUBLIC_BG_CROSSFADE_DURATION || "1.3");
 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
         {/* Background video */}
         <div className="fixed inset-0 -z-20 overflow-hidden">
-          <BackgroundVideo videoDuration={videoDuration} />
+          <BackgroundVideo videoDuration={videoDuration} crossfadeDuration={crossfadeDuration} />
           {/* Animated gradient fallback overlay */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>

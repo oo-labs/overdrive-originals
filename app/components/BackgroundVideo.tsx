@@ -4,13 +4,18 @@ import { useEffect, useRef, useState } from 'react';
 
 interface BackgroundVideoProps {
   videoDuration: number;
+  crossfadeDuration: number;
 }
 
-export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+export default function BackgroundVideo({ videoDuration, crossfadeDuration }: BackgroundVideoProps) {
+  const currentVideoRef = useRef<HTMLVideoElement>(null);
+  const nextVideoRef = useRef<HTMLVideoElement>(null);
   const [currentVideo, setCurrentVideo] = useState<string>('bg_01.mp4');
+  const [nextVideo, setNextVideo] = useState<string>('');
   const [playedVideos, setPlayedVideos] = useState<string[]>([]);
+  const [isCrossfading, setIsCrossfading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Available videos (you can add more as needed)
   const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
@@ -33,50 +38,110 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
     }
   };
 
-  // Switch to next video
-  const switchToNextVideo = () => {
-    const nextVideo = getNextVideo();
-    console.log('Switching to next video:', nextVideo, 'Played so far:', playedVideos);
-    setCurrentVideo(nextVideo);
+  // Start crossfade transition
+  const startCrossfade = () => {
+    if (isCrossfading) return;
+    
+    const nextVideoName = getNextVideo();
+    console.log('Starting crossfade to:', nextVideoName, 'Played so far:', playedVideos);
+    
+    setIsCrossfading(true);
+    setNextVideo(nextVideoName);
+    
+    // Start the next video
+    if (nextVideoRef.current) {
+      nextVideoRef.current.currentTime = 0;
+      nextVideoRef.current.play().catch(console.error);
+    }
+    
+    // Start crossfade animation
+    if (currentVideoRef.current && nextVideoRef.current) {
+      const currentVideo = currentVideoRef.current;
+      const nextVideo = nextVideoRef.current;
+      
+      // Fade out current video and fade in next video
+      currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+      nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+      
+      currentVideo.style.opacity = '0';
+      nextVideo.style.opacity = '1';
+      
+      // After crossfade completes, switch videos
+      crossfadeTimeoutRef.current = setTimeout(() => {
+        setCurrentVideo(nextVideoName);
+        setNextVideo('');
+        setIsCrossfading(false);
+        
+        // Reset styles
+        if (currentVideoRef.current) {
+          currentVideoRef.current.style.opacity = '1';
+          currentVideoRef.current.style.transition = '';
+        }
+        if (nextVideoRef.current) {
+          nextVideoRef.current.style.opacity = '0';
+          nextVideoRef.current.style.transition = '';
+        }
+      }, crossfadeDuration * 1000);
+    }
   };
 
-  // Handle video load and play
+  // Handle video timing
   useEffect(() => {
-    if (videoRef.current) {
-      const video = videoRef.current;
+    if (currentVideoRef.current && !isCrossfading) {
+      const video = currentVideoRef.current;
       
       const handleLoadedData = () => {
         video.currentTime = 0;
         video.play().catch(console.error);
         
-        // Set timeout to switch video after specified duration
+        // Clear any existing timeout
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
-        timeoutRef.current = setTimeout(() => {
-          console.log('Timeout reached, switching video...');
-          switchToNextVideo();
-        }, videoDuration * 1000);
+        
+        if (videoDuration === 0) {
+          // Play complete video
+          console.log('Playing complete video:', currentVideo);
+          // No timeout needed - will use onEnded event
+        } else {
+          // Play for specified duration
+          console.log('Playing video for', videoDuration, 'seconds:', currentVideo);
+          timeoutRef.current = setTimeout(() => {
+            startCrossfade();
+          }, videoDuration * 1000);
+        }
+      };
+
+      const handleEnded = () => {
+        if (videoDuration === 0) {
+          // Video ended naturally, start crossfade
+          console.log('Video ended naturally, starting crossfade');
+          startCrossfade();
+        }
       };
 
       const handleError = (e: Event) => {
         console.error('Video error:', e);
-        // Try next video on error
-        switchToNextVideo();
+        startCrossfade();
       };
 
       video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('ended', handleEnded);
       video.addEventListener('error', handleError);
 
       return () => {
         video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('ended', handleEnded);
         video.removeEventListener('error', handleError);
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
+        if (crossfadeTimeoutRef.current) {
+          clearTimeout(crossfadeTimeoutRef.current);
+        }
       };
     }
-  }, [currentVideo, videoDuration]);
+  }, [currentVideo, videoDuration, crossfadeDuration, isCrossfading]);
 
   // Initialize with first video
   useEffect(() => {
@@ -88,17 +153,32 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      key={currentVideo} // Force re-render when video changes
-      className="h-full w-full object-cover"
-      muted
-      playsInline
-      autoPlay
-      loop={false}
-      onError={(e) => console.error('Video error:', e)}
-      poster="/bg-poster.jpg"
-      src={`/bg/${currentVideo}`}
-    />
+    <div className="relative h-full w-full">
+      {/* Current video */}
+      <video
+        ref={currentVideoRef}
+        key={currentVideo}
+        className="absolute inset-0 h-full w-full object-cover"
+        muted
+        playsInline
+        autoPlay
+        loop={false}
+        poster="/bg-poster.jpg"
+        src={`/bg/${currentVideo}`}
+      />
+      
+      {/* Next video (for crossfading) */}
+      {isCrossfading && nextVideo && (
+        <video
+          ref={nextVideoRef}
+          key={nextVideo}
+          className="absolute inset-0 h-full w-full object-cover opacity-0"
+          muted
+          playsInline
+          loop={false}
+          src={`/bg/${nextVideo}`}
+        />
+      )}
+    </div>
   );
 }
