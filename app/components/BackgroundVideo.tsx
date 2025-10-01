@@ -183,7 +183,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Handle current video events
   useEffect(() => {
-    if (currentVideoRef.current && !isCrossfading && preloaderRef.current) {
+    if (currentVideoRef.current && preloaderRef.current) {
       const video = currentVideoRef.current;
       const preloader = preloaderRef.current;
       
@@ -302,29 +302,27 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   return (
     <div ref={containerRef} className="relative h-full w-full" style={{ zIndex: 1 }}>
-      {/* Current video (on top) - only render initially, then manage via preloader */}
-      {!isCrossfading && (
-        <video
-          ref={currentVideoRef}
-          key={currentVideo}
-          className="absolute inset-0 h-full w-full object-cover"
-          muted
-          playsInline
-          autoPlay
-          loop={false}
-          preload="auto"
-          crossOrigin="anonymous"
-          poster="/bg-poster.jpg"
-          style={{ 
-            zIndex: 10,
-            willChange: 'opacity',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            isolation: 'isolate'
-          } as React.CSSProperties}
-          src={`/bg/${currentVideo}`}
-        />
-      )}
+      {/* Current video (on top) - always render, manage via preloader during crossfades */}
+      <video
+        ref={currentVideoRef}
+        key={currentVideo}
+        className="absolute inset-0 h-full w-full object-cover"
+        muted
+        playsInline
+        autoPlay
+        loop={false}
+        preload="auto"
+        crossOrigin="anonymous"
+        poster="/bg-poster.jpg"
+        style={{ 
+          zIndex: 10,
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          isolation: 'isolate'
+        } as React.CSSProperties}
+        src={`/bg/${currentVideo}`}
+      />
     </div>
   );
 }
