@@ -44,109 +44,34 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     return playlist[nextIndex];
   }, [currentVideoIndex, playlist]);
 
-  // Preload a video
-  const preloadVideo = useCallback((videoSrc: string): Promise<HTMLVideoElement> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      video.src = `/bg/${videoSrc}`;
-      video.muted = true;
-      video.playsInline = true;
-      video.loop = false;
-      video.preload = 'auto';
-      video.crossOrigin = 'anonymous';
-      
-      // Style the video
-      video.style.position = 'absolute';
-      video.style.top = '0';
-      video.style.left = '0';
-      video.style.width = '100%';
-      video.style.height = '100%';
-      video.style.objectFit = 'cover';
-      video.style.opacity = '0';
-      video.style.zIndex = '1';
-      video.style.willChange = 'opacity';
-      video.style.transform = 'translateZ(0)';
-      video.style.backfaceVisibility = 'hidden';
-      
-      // Add to container
-      if (containerRef.current) {
-        containerRef.current.appendChild(video);
-      }
-      
-      const handleCanPlayThrough = () => {
-        video.removeEventListener('canplaythrough', handleCanPlayThrough);
-        video.removeEventListener('error', handleError);
-        console.log('✅ Video preloaded:', videoSrc);
-        resolve(video);
-      };
-      
-      const handleError = (e: Event) => {
-        video.removeEventListener('canplaythrough', handleCanPlayThrough);
-        video.removeEventListener('error', handleError);
-        console.error('❌ Failed to preload video:', videoSrc, e);
-        reject(e);
-      };
-      
-      video.addEventListener('canplaythrough', handleCanPlayThrough);
-      video.addEventListener('error', handleError);
-    });
-  }, []);
 
   // Start transition to next video
-  const startTransition = useCallback(async () => {
-    if (isTransitioning || !currentVideoRef.current) return;
+  const startTransition = useCallback(() => {
+    if (isTransitioning) return;
     
     const nextVideoSrc = getNextVideo();
     console.log('🔄 Starting transition to:', nextVideoSrc);
     
     setIsTransitioning(true);
     
-    try {
-      // Preload the next video
-      const nextVideo = await preloadVideo(nextVideoSrc);
-      nextVideoRef.current = nextVideo;
-      
-      // Start playing the next video immediately (behind current video)
-      nextVideo.currentTime = 0;
-      await nextVideo.play();
-      
-      // Set up crossfade: fade out current video
-      if (currentVideoRef.current) {
-        currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s ease-out`;
-        currentVideoRef.current.style.opacity = '0';
-      }
-      
-      // After crossfade completes, clean up and move to next video
-      setTimeout(() => {
-        console.log('✅ Transition complete');
-        
-        // Remove old current video
-        if (currentVideoRef.current && currentVideoRef.current.parentNode) {
-          currentVideoRef.current.parentNode.removeChild(currentVideoRef.current);
-        }
-        
-        // Make next video the current video
-        if (nextVideoRef.current) {
-          nextVideoRef.current.style.opacity = '1';
-          nextVideoRef.current.style.transition = '';
-          nextVideoRef.current.style.zIndex = '2';
-          currentVideoRef.current = nextVideoRef.current;
-          nextVideoRef.current = null;
-        }
-        
-        // Update playlist index
-        setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
-        setIsTransitioning(false);
-        
-        // Hide loading screen if it was showing
-        setIsLoading(false);
-      }, crossfadeDuration * 1000);
-      
-    } catch (error) {
-      console.error('❌ Transition failed:', error);
-      setIsTransitioning(false);
+    // Set up crossfade: fade out current video
+    if (currentVideoRef.current) {
+      currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s ease-out`;
+      currentVideoRef.current.style.opacity = '0';
     }
-  }, [isTransitioning, getNextVideo, preloadVideo, crossfadeDuration, playlist.length]);
+    
+    // After crossfade completes, move to next video
+    setTimeout(() => {
+      console.log('✅ Transition complete');
+      
+      // Update playlist index (this will trigger React to render new video)
+      setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
+      setIsTransitioning(false);
+      
+      // Hide loading screen if it was showing
+      setIsLoading(false);
+    }, crossfadeDuration * 1000);
+  }, [isTransitioning, getNextVideo, crossfadeDuration, playlist.length]);
 
   // Handle current video events
   useEffect(() => {
@@ -218,6 +143,29 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       
       {/* Video container */}
       <div ref={containerRef} className="relative h-full w-full">
+        {/* Next video (behind current video during transition) */}
+        {isTransitioning && playlist.length > 0 && (
+          <video
+            ref={nextVideoRef}
+            key={`next-${playlist[(currentVideoIndex + 1) % playlist.length]}`}
+            className="absolute inset-0 h-full w-full object-cover"
+            muted
+            playsInline
+            autoPlay
+            loop={false}
+            preload="auto"
+            crossOrigin="anonymous"
+            poster="/bg-poster.jpg"
+            style={{ 
+              zIndex: 1,
+              willChange: 'opacity',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+            src={`/bg/${playlist[(currentVideoIndex + 1) % playlist.length]}`}
+          />
+        )}
+        
         {/* Current video */}
         {playlist.length > 0 && (
           <video
