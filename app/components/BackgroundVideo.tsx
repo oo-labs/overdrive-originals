@@ -13,6 +13,7 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPreloading, setIsPreloading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<'video1' | 'video2'>('video1');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // 5 explicit video sources
   const video1Src = '/bg/bg_01.mp4';
@@ -63,15 +64,22 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
 
   // Ping-pong to next video
   const pingPongToNext = useCallback(() => {
+    if (isTransitioning) return; // Prevent multiple calls
+    
     const nextIndex = (currentVideoIndex + 1) % videoSources.length;
     const nextVideoSrc = videoSources[nextIndex];
     console.log(`🔄 Ping-pong to: bg_0${nextIndex + 1}.mp4`);
+    
+    setIsTransitioning(true);
     
     // Get current and next video elements
     const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
     const nextVideo = activeVideo === 'video1' ? video2Ref.current : video1Ref.current;
     
-    if (!currentVideo || !nextVideo) return;
+    if (!currentVideo || !nextVideo) {
+      setIsTransitioning(false);
+      return;
+    }
     
     // Set next video source and start playing
     nextVideo.src = nextVideoSrc;
@@ -95,6 +103,7 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
         // Switch active video
         setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
         setCurrentVideoIndex(nextIndex);
+        setIsTransitioning(false);
         
         // Reset current video for next ping-pong
         currentVideo.style.transition = '';
@@ -103,12 +112,23 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
     };
     
     nextVideo.addEventListener('canplay', handleCanPlay);
-  }, [currentVideoIndex, videoSources, activeVideo, crossfadeDuration]);
+  }, [currentVideoIndex, videoSources, activeVideo, crossfadeDuration, isTransitioning]);
 
   // Handle video events
   useEffect(() => {
     const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
     if (!currentVideo || isPreloading) return;
+    
+    const handleTimeUpdate = () => {
+      // Start next video 1 second before current video ends
+      const timeUntilEnd = currentVideo.duration - currentVideo.currentTime;
+      const preloadBuffer = 1.0; // 1 second before end
+      
+      if (timeUntilEnd <= preloadBuffer && !isTransitioning) {
+        console.log('⏰ Video near end, starting next video early');
+        pingPongToNext();
+      }
+    };
     
     const handleEnded = () => {
       console.log('📹 Video ended naturally, ping-pong');
@@ -120,14 +140,16 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
       pingPongToNext();
     };
     
+    currentVideo.addEventListener('timeupdate', handleTimeUpdate);
     currentVideo.addEventListener('ended', handleEnded);
     currentVideo.addEventListener('error', handleError);
     
     return () => {
+      currentVideo.removeEventListener('timeupdate', handleTimeUpdate);
       currentVideo.removeEventListener('ended', handleEnded);
       currentVideo.removeEventListener('error', handleError);
     };
-  }, [isPreloading, activeVideo, pingPongToNext]);
+  }, [isPreloading, activeVideo, pingPongToNext, isTransitioning]);
 
   return (
     <div className="relative h-full w-full">
