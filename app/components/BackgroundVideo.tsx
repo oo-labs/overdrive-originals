@@ -14,43 +14,59 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const video1Ref = useRef<HTMLVideoElement>(null);
   const video2Ref = useRef<HTMLVideoElement>(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [playlist, setPlaylist] = useState<string[]>([]);
   const [activeVideo, setActiveVideo] = useState<'video1' | 'video2'>('video1');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(true);
+  const [, setPreloadedVideos] = useState<Set<number>>(new Set());
   const [video1Src, setVideo1Src] = useState<string>('');
   const [video2Src, setVideo2Src] = useState<string>('');
 
-  // Generate playlist: 5x the number of available videos
-  const generatePlaylist = useCallback(() => {
-    const newPlaylist: string[] = [];
-    for (let i = 0; i < availableVideos.length * 5; i++) {
-      const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-      newPlaylist.push(randomVideo);
-    }
-    return newPlaylist;
+  // Preload all videos
+  const preloadVideos = useCallback(() => {
+    console.log('🎬 Starting video preload...');
+    
+    availableVideos.forEach((video, index) => {
+      const videoElement = document.createElement('video');
+      videoElement.src = `/bg/${video}`;
+      videoElement.preload = 'auto';
+      videoElement.muted = true;
+      videoElement.crossOrigin = 'anonymous';
+      
+      const handleCanPlay = () => {
+        console.log(`✅ Preloaded: ${video}`);
+        setPreloadedVideos(prev => new Set([...prev, index]));
+        
+        // Start playing first video when third video is preloaded
+        if (index === 2 && video1Ref.current) {
+          console.log('🎬 Starting first video playback');
+          setVideo1Src(`/bg/${availableVideos[0]}`);
+          video1Ref.current.src = `/bg/${availableVideos[0]}`;
+          video1Ref.current.play().catch(console.error);
+          setIsPreloading(false);
+        }
+      };
+      
+      videoElement.addEventListener('canplay', handleCanPlay);
+      videoElement.load();
+    });
   }, []);
 
-  // Initialize playlist
+  // Initialize preloading
   useEffect(() => {
-    const newPlaylist = generatePlaylist();
-    setPlaylist(newPlaylist);
-    if (newPlaylist.length > 0) {
-      setVideo1Src(`/bg/${newPlaylist[0]}`);
-    }
-    console.log('🎬 Playlist generated:', newPlaylist.length, 'videos');
-  }, [generatePlaylist]);
+    preloadVideos();
+  }, [preloadVideos]);
 
-  // Get next video from playlist
-  const getNextVideo = useCallback(() => {
-    const nextIndex = (currentVideoIndex + 1) % playlist.length;
-    return playlist[nextIndex];
-  }, [currentVideoIndex, playlist]);
+  // Get next video index (cycles through availableVideos)
+  const getNextVideoIndex = useCallback(() => {
+    return (currentVideoIndex + 1) % availableVideos.length;
+  }, [currentVideoIndex]);
 
   // Start transition to next video
   const startTransition = useCallback(() => {
-    if (isTransitioning || !playlist.length) return;
+    if (isTransitioning || isPreloading) return;
     
-    const nextVideoSrc = getNextVideo();
+    const nextIndex = getNextVideoIndex();
+    const nextVideoSrc = availableVideos[nextIndex];
     console.log('🔄 Starting transition to:', nextVideoSrc);
     
     setIsTransitioning(true);
@@ -61,7 +77,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     if (!currentVideo || !nextVideo) return;
     
-    // Set next video source and start playing
+    // Set next video source
     const nextVideoPath = `/bg/${nextVideoSrc}`;
     if (activeVideo === 'video1') {
       setVideo2Src(nextVideoPath);
@@ -87,9 +103,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         setTimeout(() => {
           console.log('✅ Transition complete');
           
-          // Switch active video
+          // Switch active video and update index
           setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
-          setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
+          setCurrentVideoIndex(nextIndex);
           setIsTransitioning(false);
           
           // Reset current video for next transition
@@ -103,12 +119,12 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     };
     
     nextVideo.addEventListener('canplay', handleCanPlay);
-  }, [isTransitioning, getNextVideo, crossfadeDuration, playlist.length, activeVideo]);
+  }, [isTransitioning, isPreloading, getNextVideoIndex, crossfadeDuration, activeVideo]);
 
   // Handle video events
   useEffect(() => {
     const currentVideo = activeVideo === 'video1' ? video1Ref.current : video2Ref.current;
-    if (!currentVideo || !playlist.length) return;
+    if (!currentVideo || isPreloading) return;
     
     const handleTimeUpdate = () => {
       if (videoDuration === 0) {
@@ -149,10 +165,17 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       currentVideo.removeEventListener('ended', handleEnded);
       currentVideo.removeEventListener('error', handleError);
     };
-  }, [activeVideo, playlist.length, videoDuration, crossfadeDuration, isTransitioning, startTransition]);
+  }, [activeVideo, isPreloading, videoDuration, crossfadeDuration, isTransitioning, startTransition]);
 
   return (
     <div className="relative h-full w-full">
+      {/* Loading screen - shown during preload */}
+      {isPreloading && (
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60 flex items-center justify-center">
+          <div className="text-white text-lg">Loading videos...</div>
+        </div>
+      )}
+      
       {/* Video 1 */}
       <video
         ref={video1Ref}
