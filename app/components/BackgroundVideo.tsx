@@ -17,6 +17,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const [playlist, setPlaylist] = useState<string[]>([]);
   const [activeVideo, setActiveVideo] = useState<'video1' | 'video2'>('video1');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [video1Src, setVideo1Src] = useState<string>('');
+  const [video2Src, setVideo2Src] = useState<string>('');
 
   // Generate playlist: 5x the number of available videos
   const generatePlaylist = useCallback(() => {
@@ -32,6 +34,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   useEffect(() => {
     const newPlaylist = generatePlaylist();
     setPlaylist(newPlaylist);
+    if (newPlaylist.length > 0) {
+      setVideo1Src(`/bg/${newPlaylist[0]}`);
+    }
     console.log('🎬 Playlist generated:', newPlaylist.length, 'videos');
   }, [generatePlaylist]);
 
@@ -57,31 +62,44 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     if (!currentVideo || !nextVideo) return;
     
     // Set next video source and start playing
-    nextVideo.src = `/bg/${nextVideoSrc}`;
+    const nextVideoPath = `/bg/${nextVideoSrc}`;
+    if (activeVideo === 'video1') {
+      setVideo2Src(nextVideoPath);
+    } else {
+      setVideo1Src(nextVideoPath);
+    }
+    nextVideo.src = nextVideoPath;
     nextVideo.currentTime = 0;
-    nextVideo.play().catch(console.error);
     
-    // Wait for next video to start playing, then begin crossfade
+    // Wait for next video to be ready, then start playing and crossfade
     const handleCanPlay = () => {
       nextVideo.removeEventListener('canplay', handleCanPlay);
       
-      // Start crossfade
-      currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
-      currentVideo.style.opacity = '0';
-      
-      // After crossfade completes
-      setTimeout(() => {
-        console.log('✅ Transition complete');
+      // Start playing the next video
+      nextVideo.play().then(() => {
+        console.log('🎬 Next video started playing');
         
-        // Switch active video
-        setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
-        setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
+        // Start crossfade
+        currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
+        currentVideo.style.opacity = '0';
+        
+        // After crossfade completes
+        setTimeout(() => {
+          console.log('✅ Transition complete');
+          
+          // Switch active video
+          setActiveVideo(prev => prev === 'video1' ? 'video2' : 'video1');
+          setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
+          setIsTransitioning(false);
+          
+          // Reset current video for next transition
+          currentVideo.style.transition = '';
+          currentVideo.style.opacity = '1';
+        }, crossfadeDuration * 1000);
+      }).catch((error) => {
+        console.error('❌ Failed to play next video:', error);
         setIsTransitioning(false);
-        
-        // Reset current video for next transition
-        currentVideo.style.transition = '';
-        currentVideo.style.opacity = '1';
-      }, crossfadeDuration * 1000);
+      });
     };
     
     nextVideo.addEventListener('canplay', handleCanPlay);
@@ -138,7 +156,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       {/* Video 1 */}
       <video
         ref={video1Ref}
-        key={`video1-${playlist[currentVideoIndex]}`}
+        key={`video1-${video1Src}`}
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
@@ -154,13 +172,13 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden'
         }}
-        src={playlist.length > 0 ? `/bg/${playlist[currentVideoIndex]}` : ''}
+        src={video1Src}
       />
       
       {/* Video 2 */}
       <video
         ref={video2Ref}
-        key={`video2-${playlist[currentVideoIndex]}`}
+        key={`video2-${video2Src}`}
         className="absolute inset-0 h-full w-full object-cover"
         muted
         playsInline
@@ -175,7 +193,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden'
         }}
-        src=""
+        src={video2Src}
       />
     </div>
   );
