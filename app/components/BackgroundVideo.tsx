@@ -59,7 +59,15 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
     if (videoRef.current) {
       videoRef.current.src = `/bg/${nextVideo}`;
       videoRef.current.load();
-      videoRef.current.play().catch(console.error);
+      
+      // Wait for video to be ready before playing
+      const handleCanPlay = () => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(console.error);
+        }
+      };
+      
+      videoRef.current.addEventListener('canplay', handleCanPlay, { once: true });
     }
   };
 
@@ -69,7 +77,21 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
       const initialVideo = getNextVideo();
       videoRef.current.src = `/bg/${initialVideo}`;
       videoRef.current.load();
-      videoRef.current.play().catch(console.error);
+      
+      // Wait for video to be ready before playing
+      const handleCanPlay = () => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(console.error);
+        }
+      };
+      
+      videoRef.current.addEventListener('canplay', handleCanPlay);
+      
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('canplay', handleCanPlay);
+        }
+      };
     }
   }, [availableVideos]);
 
@@ -94,7 +116,10 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
       className="h-full w-full object-cover"
       muted
       playsInline
+      autoPlay
+      loop={false}
       onEnded={handleVideoEnd}
+      onError={(e) => console.error('Video error:', e)}
       poster="/bg-poster.jpg"
     />
   );
