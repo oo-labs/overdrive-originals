@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Overdrive Originals",
-  description: "A content studio by Esse Werks: Race Support, Second Chance Customs, and more.",
+  description: "An independent content studio: Race Support, Second Chance Customs, and more.",
 };
 
 export default function RootLayout({

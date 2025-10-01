@@ -16,7 +16,7 @@ export default function About() {
           
           <div className="text-white/90 text-base sm:text-lg leading-relaxed space-y-6">
             <p>
-              Overdrive Originals is a content studio by Esse Werks, dedicated to creating 
+              Overdrive Originals is an independent content studio dedicated to creating 
               high-quality automotive content and supporting the racing community.
             </p>
             
