@@ -56,7 +56,7 @@ export default function RootLayout({
         {/* Footer - viewport bottom */}
         <footer className="fixed bottom-8 left-0 right-0 z-10">
           <div className="text-center text-white/70 text-sm leading-relaxed px-4">
-            © {new Date().getFullYear()} Overdrive Originals by Esse Werks. All rights reserved.
+            © {new Date().getFullYear()} Overdrive Originals. All rights reserved.
             <br />
             This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
           </div>
