@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
-      <div className="grid grid-cols-3 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
         {tiles.map((tile) => {
           const tileClasses = `glass block aspect-square p-1 sm:p-2 ${
             tile.static 
