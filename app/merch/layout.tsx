@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import BackgroundVideo from "./components/BackgroundVideo";
+import "../../globals.css";
+import DimmedBackgroundVideo from "../components/DimmedBackgroundVideo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,24 +16,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Overdrive Originals",
-  description: "A content studio by Esse Werks: Race Support, Second Chance Customs, and more.",
+  title: "Merch - Overdrive Originals",
+  description: "Official Overdrive Originals merchandise and apparel.",
 };
 
-export default function RootLayout({
+export default function MerchLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const videoDuration = parseFloat(process.env.NEXT_PUBLIC_BG_VIDEO_DURATION || "6.0");
   const crossfadeDuration = parseFloat(process.env.NEXT_PUBLIC_BG_CROSSFADE_DURATION || "1.3");
 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
-        {/* Background video */}
+        {/* Dimmed background video */}
         <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1000 }}>
-          <BackgroundVideo videoDuration={videoDuration} crossfadeDuration={crossfadeDuration} />
+          <DimmedBackgroundVideo crossfadeDuration={crossfadeDuration} />
         </div>
 
         {/* Floating brand logo - viewport top */}
