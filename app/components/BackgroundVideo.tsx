@@ -20,7 +20,7 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
     const remaining = availableVideos.filter(video => !playedVideos.includes(video));
     
     if (remaining.length === 0) {
-      // All videos played, reset and start fresh
+      // All videos played, reset and start fresh with new random order
       setPlayedVideos([]);
       const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
       setPlayedVideos([randomVideo]);
@@ -36,6 +36,7 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
   // Switch to next video
   const switchToNextVideo = () => {
     const nextVideo = getNextVideo();
+    console.log('Switching to next video:', nextVideo, 'Played so far:', playedVideos);
     setCurrentVideo(nextVideo);
   };
 
@@ -53,6 +54,7 @@ export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps)
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = setTimeout(() => {
+          console.log('Timeout reached, switching video...');
           switchToNextVideo();
         }, videoDuration * 1000);
       };
