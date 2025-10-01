@@ -14,20 +14,40 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const [nextVideo, setNextVideo] = useState<string>('');
   const [isCrossfading, setIsCrossfading] = useState(false);
   const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Video playlist management
+  const [playlist, setPlaylist] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const playlistRef = useRef<string[]>([]);
+  const currentIndexRef = useRef(0);
 
   // Available videos (you can add more as needed)
   const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
-  // Get next video to play (avoiding the current video)
-  const getNextVideo = (currentVideoName: string) => {
-    // Filter out the current video to avoid immediate repeats
-    const otherVideos = availableVideos.filter(video => video !== currentVideoName);
-    const randomVideo = otherVideos[Math.floor(Math.random() * otherVideos.length)];
-    console.log('🎬 getNextVideo called with current:', currentVideoName);
-    console.log('🎬 Available videos:', availableVideos);
-    console.log('🎬 Other videos (excluding current):', otherVideos);
-    console.log('🎬 Selected next video:', randomVideo);
-    return randomVideo;
+  // Generate a 25-slot playlist (5x the number of available videos)
+  const generatePlaylist = () => {
+    const newPlaylist: string[] = [];
+    for (let i = 0; i < 25; i++) {
+      const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+      newPlaylist.push(randomVideo);
+    }
+    console.log('🎵 Generated new playlist:', newPlaylist);
+    return newPlaylist;
+  };
+
+  // Get next video from playlist
+  const getNextVideoFromPlaylist = () => {
+    const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length;
+    const nextVideo = playlistRef.current[nextIndex];
+    console.log('🎵 Getting next video from playlist. Current index:', currentIndexRef.current, 'Next index:', nextIndex, 'Next video:', nextVideo);
+    return nextVideo;
+  };
+
+  // Get video at specific index from playlist
+  const getVideoAtIndex = (index: number) => {
+    const video = playlistRef.current[index];
+    console.log('🎵 Getting video at index:', index, 'Video:', video);
+    return video;
   };
 
   // Start crossfade from video end
@@ -96,12 +116,16 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       console.log('✅ Crossfade complete, switching videos. Current:', nextVideoName);
       console.log('✅ Setting currentVideo to:', nextVideoName);
       
+      // Update playlist index
+      currentIndexRef.current = (currentIndexRef.current + 1) % playlistRef.current.length;
+      setCurrentIndex(currentIndexRef.current);
+      
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
       
-      // Get the next video after this one (avoiding the current video)
-      console.log('✅ Getting next video after crossfade...');
-      const nextNextVideo = getNextVideo(nextVideoName);
+      // Get the next video from playlist
+      console.log('✅ Getting next video from playlist...');
+      const nextNextVideo = getNextVideoFromPlaylist();
       console.log('✅ Setting nextVideo to:', nextNextVideo);
       setNextVideo(nextNextVideo);
       
@@ -133,9 +157,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         video.currentTime = 0;
         video.play().catch(console.error);
         
-        // Pre-load the next video (avoiding the current video)
-        console.log('📹 Getting next video for current:', currentVideo);
-        const nextVideoName = getNextVideo(currentVideo);
+        // Pre-load the next video from playlist
+        console.log('📹 Getting next video from playlist for current:', currentVideo);
+        const nextVideoName = getNextVideoFromPlaylist();
         console.log('📹 Setting nextVideo state to:', nextVideoName);
         setNextVideo(nextVideoName);
         console.log('📹 Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
@@ -208,12 +232,16 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     }
   }, [nextVideo, isCrossfading]);
 
-  // Initialize with first video
+  // Initialize playlist and first video
   useEffect(() => {
-    const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-    console.log('🚀 Initializing with first video:', firstVideo);
+    const newPlaylist = generatePlaylist();
+    setPlaylist(newPlaylist);
+    playlistRef.current = newPlaylist;
+    
+    const firstVideo = newPlaylist[0];
+    console.log('🚀 Initializing with first video from playlist:', firstVideo);
     setCurrentVideo(firstVideo);
-    console.log('🚀 Initialized with video:', firstVideo);
+    console.log('🚀 Initialized with video:', firstVideo, 'Playlist length:', newPlaylist.length);
   }, []);
 
   return (
