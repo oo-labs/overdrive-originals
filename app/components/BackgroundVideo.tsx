@@ -40,8 +40,6 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         if (index === 2 && video1Ref.current) {
           console.log('🎬 Starting first video playback');
           setVideo1Src(`/bg/${availableVideos[0]}`);
-          video1Ref.current.src = `/bg/${availableVideos[0]}`;
-          video1Ref.current.play().catch(console.error);
           setIsPreloading(false);
         }
       };
@@ -55,6 +53,21 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   useEffect(() => {
     preloadVideos();
   }, [preloadVideos]);
+
+  // Handle video playback when source is set
+  useEffect(() => {
+    if (video1Src && video1Ref.current && !isPreloading) {
+      video1Ref.current.src = video1Src;
+      video1Ref.current.play().catch(console.error);
+    }
+  }, [video1Src, isPreloading]);
+
+  useEffect(() => {
+    if (video2Src && video2Ref.current && !isPreloading) {
+      video2Ref.current.src = video2Src;
+      video2Ref.current.currentTime = 0;
+    }
+  }, [video2Src, isPreloading]);
 
   // Get next video index (cycles through availableVideos)
   const getNextVideoIndex = useCallback(() => {
@@ -84,8 +97,6 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     } else {
       setVideo1Src(nextVideoPath);
     }
-    nextVideo.src = nextVideoPath;
-    nextVideo.currentTime = 0;
     
     // Wait for next video to be ready, then start playing and crossfade
     const handleCanPlay = () => {
@@ -118,7 +129,12 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       });
     };
     
-    nextVideo.addEventListener('canplay', handleCanPlay);
+    // Add event listener after a short delay to ensure src is set
+    setTimeout(() => {
+      if (nextVideo.src) {
+        nextVideo.addEventListener('canplay', handleCanPlay);
+      }
+    }, 100);
   }, [isTransitioning, isPreloading, getNextVideoIndex, crossfadeDuration, activeVideo]);
 
   // Handle video events
