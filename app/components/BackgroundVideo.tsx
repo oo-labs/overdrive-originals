@@ -123,19 +123,20 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       currentIndexRef.current = (currentIndexRef.current + 1) % playlistRef.current.length;
       console.log('✅ New playlist index:', currentIndexRef.current);
       
-      // Reset styles and clean up GPU acceleration BEFORE switching videos
-      if (currentVideoRef.current) {
-        currentVideoRef.current.style.opacity = '1';
-        currentVideoRef.current.style.transition = '';
-        currentVideoRef.current.style.willChange = 'auto';
-      }
+      // The next video is now the current video - swap the refs instead of re-rendering
       if (nextVideoRef.current) {
-        nextVideoRef.current.style.opacity = '0';
+        // Make the next video the current video by updating its styles
+        nextVideoRef.current.style.opacity = '1';
         nextVideoRef.current.style.transition = '';
         nextVideoRef.current.style.willChange = 'auto';
+        nextVideoRef.current.style.zIndex = '10';
+        
+        // Update the current video ref to point to the next video
+        currentVideoRef.current = nextVideoRef.current;
+        nextVideoRef.current = null;
       }
       
-      // The next video is now the current video
+      // Update the state to reflect the new current video (but don't re-render the video element)
       setCurrentVideo(nextVideoName);
       
       // Clean up unused videos and preload next videos in the background
@@ -262,26 +263,28 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   return (
     <div ref={containerRef} className="relative h-full w-full">
-      {/* Current video (on top) */}
-      <video
-        ref={currentVideoRef}
-        key={currentVideo}
-        className="absolute inset-0 h-full w-full object-cover z-10"
-        muted
-        playsInline
-        autoPlay
-        loop={false}
-        preload="auto"
-        crossOrigin="anonymous"
-        poster="/bg-poster.jpg"
-        style={{ 
-          willChange: 'opacity',
-          transform: 'translateZ(0)',
-          backfaceVisibility: 'hidden',
-          isolation: 'isolate'
-        } as React.CSSProperties}
-        src={`/bg/${currentVideo}`}
-      />
+      {/* Current video (on top) - only render initially, then manage via preloader */}
+      {!isCrossfading && (
+        <video
+          ref={currentVideoRef}
+          key={currentVideo}
+          className="absolute inset-0 h-full w-full object-cover z-10"
+          muted
+          playsInline
+          autoPlay
+          loop={false}
+          preload="auto"
+          crossOrigin="anonymous"
+          poster="/bg-poster.jpg"
+          style={{ 
+            willChange: 'opacity',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            isolation: 'isolate'
+          } as React.CSSProperties}
+          src={`/bg/${currentVideo}`}
+        />
+      )}
     </div>
   );
 }
