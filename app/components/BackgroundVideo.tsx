@@ -117,16 +117,20 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     // Wait a moment for the next video to start playing, then begin crossfade
     setTimeout(() => {
       // Set up crossfade transition - only fade out current video
-      currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
-      
-      // Force GPU acceleration
-      currentVideoRef.current.style.willChange = 'opacity';
-      
-      // Use requestAnimationFrame to ensure smooth transition start
-      requestAnimationFrame(() => {
-        // Only fade out the current video - next video is already visible and playing
-        currentVideoRef.current!.style.opacity = '0';
-      });
+      if (currentVideoRef.current) {
+        currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
+        
+        // Force GPU acceleration
+        currentVideoRef.current.style.willChange = 'opacity';
+        
+        // Use requestAnimationFrame to ensure smooth transition start
+        requestAnimationFrame(() => {
+          // Only fade out the current video - next video is already visible and playing
+          if (currentVideoRef.current) {
+            currentVideoRef.current.style.opacity = '0';
+          }
+        });
+      }
     }, 100); // Small delay to ensure next video is playing
     
     // After crossfade completes, switch to next video
