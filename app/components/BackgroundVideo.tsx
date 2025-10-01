@@ -100,7 +100,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     nextVideoRef.current.style.width = '100%';
     nextVideoRef.current.style.height = '100%';
     nextVideoRef.current.style.objectFit = 'cover';
-    nextVideoRef.current.style.opacity = '0';
+    nextVideoRef.current.style.opacity = '1'; // Start visible since it's already playing
     nextVideoRef.current.style.zIndex = '0';
     nextVideoRef.current.style.willChange = 'opacity';
     nextVideoRef.current.style.transform = 'translateZ(0)';
@@ -110,24 +110,24 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     console.log('🔄 Starting crossfade with preloaded video');
     setIsCrossfading(true);
     
-    // Start the next video playing
+    // Start the next video playing immediately
     nextVideoRef.current.currentTime = 0;
     nextVideoRef.current.play().catch(console.error);
     
-    // Set up crossfade transitions with GPU acceleration
-    currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
-    nextVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
-    
-    // Force GPU acceleration
-    currentVideoRef.current.style.willChange = 'opacity';
-    nextVideoRef.current.style.willChange = 'opacity';
-    
-    // Use requestAnimationFrame to ensure smooth transition start
-    requestAnimationFrame(() => {
-      // Start fade out of current video and fade in of next video
-      currentVideoRef.current!.style.opacity = '0';
-      nextVideoRef.current!.style.opacity = '1';
-    });
+    // Wait a moment for the next video to start playing, then begin crossfade
+    setTimeout(() => {
+      // Set up crossfade transition - only fade out current video
+      currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
+      
+      // Force GPU acceleration
+      currentVideoRef.current.style.willChange = 'opacity';
+      
+      // Use requestAnimationFrame to ensure smooth transition start
+      requestAnimationFrame(() => {
+        // Only fade out the current video - next video is already visible and playing
+        currentVideoRef.current!.style.opacity = '0';
+      });
+    }, 100); // Small delay to ensure next video is playing
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
@@ -140,7 +140,6 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // The next video is now the current video - swap the refs instead of re-rendering
       if (nextVideoRef.current) {
         // Make the next video the current video by updating its styles
-        nextVideoRef.current.style.opacity = '1';
         nextVideoRef.current.style.transition = '';
         nextVideoRef.current.style.willChange = 'auto';
         nextVideoRef.current.style.zIndex = '10';
@@ -159,7 +158,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       
       setIsCrossfading(false);
       crossfadeTimeoutRef.current = null;
-    }, crossfadeDuration * 1000);
+    }, crossfadeDuration * 1000 + 100); // Add the 100ms delay we added earlier
   }, [crossfadeDuration, isCrossfading]);
 
   // Handle current video events
