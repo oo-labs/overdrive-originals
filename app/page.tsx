@@ -17,14 +17,14 @@ export default function Home() {
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
         {tiles.map((tile) => {
-          const tileClasses = `glass tile-glow tile-button group block aspect-square p-1 sm:p-2 ${
+          const tileClasses = `glass block aspect-square p-1 sm:p-2 ${
             tile.static 
               ? "opacity-60" 
-              : "hover:scale-110 active:scale-95"
+              : "tile-glow tile-button group hover:scale-110 active:scale-95"
           }`;
           
-          const iconClasses = `w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 filter drop-shadow-lg transition-all duration-300 ${
-            tile.static ? "opacity-60" : "opacity-80 group-hover:opacity-100 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"
+          const iconClasses = `w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 filter drop-shadow-lg ${
+            tile.static ? "opacity-60" : "opacity-80 group-hover:opacity-100 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)] transition-all duration-300"
           }`;
           
           const tileContent = (
@@ -35,7 +35,7 @@ export default function Home() {
                   alt={tile.title}
                   width={80}
                   height={80}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain brightness-0 invert"
                 />
               </div>
               <div className="text-white font-bold text-xs sm:text-sm lg:text-base tracking-wide mb-1 leading-tight">
