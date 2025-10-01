@@ -20,6 +20,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [playlist, setPlaylist] = useState<string[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
   
   // Generate playlist: 5x the number of available videos
   const generatePlaylist = useCallback(() => {
@@ -67,6 +68,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // Update playlist index (this will trigger React to render new video)
       setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
       setIsTransitioning(false);
+      setIsPreloading(false); // Reset preloading state
       
       // Hide loading screen if it was showing
       setIsLoading(false);
@@ -88,17 +90,36 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     const handleTimeUpdate = () => {
       if (videoDuration === 0) {
-        // For complete videos, start transition when near the end
+        // For complete videos
         const timeUntilEnd = video.duration - video.currentTime;
-        const transitionBuffer = crossfadeDuration + 0.5; // 500ms buffer
+        const preloadBuffer = crossfadeDuration + 3.0; // Start preloading 3 seconds before crossfade
+        const transitionBuffer = crossfadeDuration + 0.5; // Start crossfade 500ms before end
+        
+        // Start preloading next video 3 seconds before crossfade
+        if (timeUntilEnd <= preloadBuffer && !isPreloading && !isTransitioning) {
+          console.log('🎬 Starting preload 3 seconds before crossfade');
+          setIsPreloading(true);
+        }
+        
+        // Start crossfade when near the end
         if (timeUntilEnd <= transitionBuffer && !isTransitioning) {
-          console.log('⏰ Video near end, starting transition');
+          console.log('⏰ Video near end, starting crossfade');
           startTransition();
         }
       } else {
-        // For timed videos, start transition when time is up
+        // For timed videos
+        const timeUntilEnd = videoDuration - video.currentTime;
+        const preloadBuffer = crossfadeDuration + 3.0; // Start preloading 3 seconds before crossfade
+        
+        // Start preloading next video 3 seconds before crossfade
+        if (timeUntilEnd <= preloadBuffer && !isPreloading && !isTransitioning) {
+          console.log('🎬 Starting preload 3 seconds before crossfade');
+          setIsPreloading(true);
+        }
+        
+        // Start crossfade when time is up
         if (video.currentTime >= videoDuration && !isTransitioning) {
-          console.log('⏰ Video duration reached, starting transition');
+          console.log('⏰ Video duration reached, starting crossfade');
           startTransition();
         }
       }
@@ -143,8 +164,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       
       {/* Video container */}
       <div ref={containerRef} className="relative h-full w-full">
-        {/* Next video (behind current video during transition) */}
-        {isTransitioning && playlist.length > 0 && (
+        {/* Next video (behind current video during preload and transition) */}
+        {(isPreloading || isTransitioning) && playlist.length > 0 && (
           <video
             ref={nextVideoRef}
             key={`next-${playlist[(currentVideoIndex + 1) % playlist.length]}`}
