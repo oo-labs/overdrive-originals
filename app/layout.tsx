@@ -141,36 +141,45 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative h-screen overflow-hidden`}>
         {/* Background video */}
         <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1000 }}>
           <BackgroundVideo videoDuration={videoDuration} crossfadeDuration={crossfadeDuration} />
         </div>
 
-        {/* Floating brand logo - viewport top */}
-        <header className="fixed top-4 sm:top-8 left-0 right-0 z-10">
-          <div className="flex justify-center">
-            <Link href="/" className="text-white hover:opacity-80 transition-opacity p-4 sm:p-8 block">
-              <Image src="/oo.svg" alt="Overdrive Originals" width={154} height={154} className="w-[154px] h-[154px] sm:w-[192px] sm:h-[192px]" />
-            </Link>
-          </div>
-        </header>
+        {/* Main layout container - full viewport height */}
+        <div className="h-screen flex flex-col">
+          {/* Floating brand logo - responsive positioning */}
+          <header className="flex-shrink-0 z-20">
+            <div className="flex justify-center pt-2 xs:pt-3 sm:pt-4 md:pt-6 lg:pt-8">
+              <Link href="/" className="text-white hover:opacity-80 transition-opacity block">
+                <Image 
+                  src="/oo.svg" 
+                  alt="Overdrive Originals" 
+                  width={154} 
+                  height={154} 
+                  className="w-24 h-24 xs:w-28 xs:h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-52 xl:h-52" 
+                />
+              </Link>
+            </div>
+          </header>
 
-        {/* Page content - full viewport height */}
-        <div className="min-h-screen flex flex-col">
-          <div className="flex-1 flex items-center justify-center pt-32 pb-24 sm:pt-32 sm:pb-32">
-            {children}
-          </div>
+          {/* Page content - flexible center area */}
+          <main className="flex-1 flex items-center justify-center px-3 xs:px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+            <div className="w-full max-w-7xl">
+              {children}
+            </div>
+          </main>
+
+          {/* Footer - bottom of viewport with proper z-index */}
+          <footer className="flex-shrink-0 z-10 pb-2 xs:pb-3 sm:pb-4 md:pb-6 lg:pb-8">
+            <div className="text-center text-white/70 text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base leading-relaxed px-4">
+              © {new Date().getFullYear()} Overdrive Originals. All rights reserved.
+              <br />
+              This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
+            </div>
+          </footer>
         </div>
-
-        {/* Footer - viewport bottom */}
-        <footer className="fixed bottom-4 sm:bottom-8 left-0 right-0 z-10">
-          <div className="text-center text-white/70 text-[10px] sm:text-sm leading-relaxed px-4">
-            © {new Date().getFullYear()} Overdrive Originals. All rights reserved.
-            <br />
-            This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
-          </div>
-        </footer>
       </body>
     </html>
   );

@@ -14,16 +14,16 @@ export default function Home() {
   ];
 
   return (
-    <main className="relative z-10 w-full h-full flex items-center justify-center px-6 sm:px-12 py-20">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-12 max-w-6xl w-full place-items-center">
+    <div className="relative z-10 w-full h-full flex items-center justify-center">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 xs:gap-5 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12 w-full place-items-center">
         {tiles.map((tile) => {
-          const tileClasses = `glass block p-1 sm:p-2 w-40 h-40 sm:w-56 sm:h-56 border-2 sm:border-4 ${
+          const tileClasses = `glass block p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 w-32 h-32 xs:w-36 xs:h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 border-2 xs:border-2.5 sm:border-3 md:border-4 lg:border-4 xl:border-5 ${
             tile.static 
               ? "opacity-60" 
               : "tile-glow tile-button group hover:scale-110 active:scale-95"
           }`;
           
-          const iconClasses = `w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 ${
+          const iconClasses = `w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 mb-1 xs:mb-1.5 sm:mb-2 md:mb-2.5 lg:mb-3 ${
             tile.static ? "opacity-60" : "tile-svg opacity-80 group-hover:opacity-100 group-hover:scale-110"
           }`;
           
@@ -38,13 +38,13 @@ export default function Home() {
                   className="w-full h-full object-contain brightness-0 invert"
                 />
               </div>
-              <div className={`font-bold text-xs sm:text-sm lg:text-base tracking-wide mb-1 leading-tight ${
+              <div className={`font-bold text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg tracking-wide mb-0.5 xs:mb-1 sm:mb-1 leading-tight ${
                 tile.static ? "text-white" : "tile-text"
               }`}>
                 {tile.title}
               </div>
               {tile.subtitle && (
-                <div className={`text-xs leading-tight ${
+                <div className={`text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base leading-tight ${
                   tile.static ? "text-white/70" : "tile-subtitle"
                 }`}>
                   {tile.subtitle}
