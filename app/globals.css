@@ -42,3 +42,51 @@ video {
 .glass {
   @apply rounded-xl border border-white/20 bg-white/5 backdrop-blur-lg text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] border-t-white/30;
 }
+
+/* Automotive green glow effect for tiles */
+.tile-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.tile-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.tile-glow:hover::before {
+  opacity: 1;
+}
+
+/* Enhanced automotive button effect */
+.tile-button {
+  position: relative;
+  background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tile-button:hover {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 
+    0 0 20px rgba(34, 197, 94, 0.3),
+    0 0 40px rgba(34, 197, 94, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.tile-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 0 10px rgba(34, 197, 94, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
