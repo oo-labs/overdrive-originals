@@ -48,6 +48,10 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     setIsCrossfading(true);
     
+    // Start the next video playing
+    nextVideo.currentTime = 0;
+    nextVideo.play().catch(console.error);
+    
     // Set up crossfade transitions
     currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
     nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
