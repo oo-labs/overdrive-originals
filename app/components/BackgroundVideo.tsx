@@ -48,40 +48,44 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     setIsCrossfading(true);
     setNextVideo(nextVideoName);
     
-    // Start the next video
+    // Wait for next video to load before starting crossfade
     if (nextVideoRef.current) {
-      nextVideoRef.current.currentTime = 0;
-      nextVideoRef.current.play().catch(console.error);
-    }
-    
-    // Start crossfade animation
-    if (currentVideoRef.current && nextVideoRef.current) {
-      const currentVideo = currentVideoRef.current;
-      const nextVideo = nextVideoRef.current;
-      
-      // Fade out current video and fade in next video
-      currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
-      nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
-      
-      currentVideo.style.opacity = '0';
-      nextVideo.style.opacity = '1';
-      
-      // After crossfade completes, switch videos
-      crossfadeTimeoutRef.current = setTimeout(() => {
-        setCurrentVideo(nextVideoName);
-        setNextVideo('');
-        setIsCrossfading(false);
-        
-        // Reset styles
-        if (currentVideoRef.current) {
-          currentVideoRef.current.style.opacity = '1';
-          currentVideoRef.current.style.transition = '';
+      const handleNextVideoReady = () => {
+        if (currentVideoRef.current && nextVideoRef.current) {
+          const currentVideo = currentVideoRef.current;
+          const nextVideo = nextVideoRef.current;
+          
+          // Start the next video
+          nextVideo.currentTime = 0;
+          nextVideo.play().catch(console.error);
+          
+          // Fade out current video and fade in next video
+          currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+          nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+          
+          currentVideo.style.opacity = '0';
+          nextVideo.style.opacity = '1';
+          
+          // After crossfade completes, switch videos
+          crossfadeTimeoutRef.current = setTimeout(() => {
+            setCurrentVideo(nextVideoName);
+            setNextVideo('');
+            setIsCrossfading(false);
+            
+            // Reset styles
+            if (currentVideoRef.current) {
+              currentVideoRef.current.style.opacity = '1';
+              currentVideoRef.current.style.transition = '';
+            }
+            if (nextVideoRef.current) {
+              nextVideoRef.current.style.opacity = '0';
+              nextVideoRef.current.style.transition = '';
+            }
+          }, crossfadeDuration * 1000);
         }
-        if (nextVideoRef.current) {
-          nextVideoRef.current.style.opacity = '0';
-          nextVideoRef.current.style.transition = '';
-        }
-      }, crossfadeDuration * 1000);
+      };
+      
+      nextVideoRef.current.addEventListener('loadeddata', handleNextVideoReady, { once: true });
     }
   };
 
