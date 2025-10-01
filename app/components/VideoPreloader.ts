@@ -42,7 +42,7 @@ export class VideoPreloader {
     video.style.height = '100%';
     video.style.objectFit = 'cover';
     video.style.opacity = '0';
-    video.style.zIndex = '0';
+    video.style.zIndex = '5'; // Higher than fallback but lower than current video
     video.style.willChange = 'opacity';
     video.style.transform = 'translateZ(0)';
     video.style.backfaceVisibility = 'hidden';

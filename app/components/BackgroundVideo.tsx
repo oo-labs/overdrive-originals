@@ -110,6 +110,12 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     console.log('🔄 Starting crossfade with preloaded video');
     setIsCrossfading(true);
     
+    // Ensure background fallback stays hidden during crossfade
+    const fallback = document.getElementById('bg-fallback');
+    if (fallback) {
+      fallback.style.display = 'none';
+    }
+    
     // Start the next video playing immediately
     nextVideoRef.current.currentTime = 0;
     nextVideoRef.current.play().catch(console.error);
@@ -185,6 +191,12 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         console.log('📹 Current video loaded:', currentVideo);
         video.currentTime = 0;
         video.play().catch(console.error);
+        
+        // Hide the background fallback once video is loaded
+        const fallback = document.getElementById('bg-fallback');
+        if (fallback) {
+          fallback.style.display = 'none';
+        }
         
         // Preload next videos in the background
         preloader.preloadPlaylist(playlistRef.current, currentIndexRef.current).catch(console.error);
@@ -289,13 +301,13 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   }, [generatePlaylist]);
 
   return (
-    <div ref={containerRef} className="relative h-full w-full">
+    <div ref={containerRef} className="relative h-full w-full" style={{ zIndex: 1 }}>
       {/* Current video (on top) - only render initially, then manage via preloader */}
       {!isCrossfading && (
         <video
           ref={currentVideoRef}
           key={currentVideo}
-          className="absolute inset-0 h-full w-full object-cover z-10"
+          className="absolute inset-0 h-full w-full object-cover"
           muted
           playsInline
           autoPlay
@@ -304,6 +316,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           crossOrigin="anonymous"
           poster="/bg-poster.jpg"
           style={{ 
+            zIndex: 10,
             willChange: 'opacity',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
