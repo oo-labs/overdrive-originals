@@ -14,28 +14,17 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const [nextVideo, setNextVideo] = useState<string>('');
   const [isCrossfading, setIsCrossfading] = useState(false);
   const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const playedVideosRef = useRef<string[]>([]);
 
   // Available videos (you can add more as needed)
   const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
   // Get next video to play
   const getNextVideo = () => {
-    const remaining = availableVideos.filter(video => !playedVideosRef.current.includes(video));
-    
-    if (remaining.length === 0) {
-      // All videos played, reset and start fresh with new random order
-      console.log('All videos played, resetting playlist');
-      playedVideosRef.current = [];
-      const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-      playedVideosRef.current.push(randomVideo);
-      return randomVideo;
-    } else {
-      // Pick randomly from remaining videos
-      const randomVideo = remaining[Math.floor(Math.random() * remaining.length)];
-      playedVideosRef.current.push(randomVideo);
-      return randomVideo;
-    }
+    // Always pick a random video from all available videos
+    // This ensures infinite rotation with random selection
+    const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+    console.log('Selected random video:', randomVideo, 'from available:', availableVideos);
+    return randomVideo;
   };
 
   // Start crossfade from video end
@@ -64,7 +53,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
-      console.log('Crossfade complete, switching videos. Current:', nextVideoName, 'Played videos:', playedVideosRef.current);
+      console.log('Crossfade complete, switching videos. Current:', nextVideoName);
       
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
@@ -72,7 +61,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // Get the next video after this one
       const nextNextVideo = getNextVideo();
       setNextVideo(nextNextVideo);
-      console.log('Next video after crossfade:', nextNextVideo, 'Played videos after:', playedVideosRef.current);
+      console.log('Next video after crossfade:', nextNextVideo);
       
       setIsCrossfading(false);
       
@@ -100,7 +89,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         // Pre-load the next video
         const nextVideoName = getNextVideo();
         setNextVideo(nextVideoName);
-        console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName, 'Played videos:', playedVideosRef.current);
+        console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
       };
 
       const handleTimeUpdate = () => {
@@ -170,11 +159,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Initialize with first video
   useEffect(() => {
-    if (playedVideosRef.current.length === 0) {
-      const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-      playedVideosRef.current.push(firstVideo);
-      setCurrentVideo(firstVideo);
-    }
+    const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+    setCurrentVideo(firstVideo);
+    console.log('Initialized with video:', firstVideo);
   }, []);
 
   return (
