@@ -92,6 +92,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       setIsCrossfading(false);
       console.log('✅ Crossfade complete, isCrossfading set to false');
       
+      // Clear the timeout reference
+      crossfadeTimeoutRef.current = null;
+      
       // Reset styles
       if (currentVideoRef.current) {
         currentVideoRef.current.style.opacity = '1';
@@ -161,9 +164,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         video.removeEventListener('timeupdate', handleTimeUpdate);
         video.removeEventListener('ended', handleEnded);
         video.removeEventListener('error', handleError);
-        if (crossfadeTimeoutRef.current) {
-          clearTimeout(crossfadeTimeoutRef.current);
-        }
+        // Don't clear crossfade timeout during cleanup - let it complete
+        // The crossfade timeout will be cleared when the crossfade actually completes
       };
     }
   }, [currentVideo, videoDuration, crossfadeDuration, isCrossfading]);
