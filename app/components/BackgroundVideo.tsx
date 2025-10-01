@@ -12,28 +12,28 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const nextVideoRef = useRef<HTMLVideoElement>(null);
   const [currentVideo, setCurrentVideo] = useState<string>('bg_01.mp4');
   const [nextVideo, setNextVideo] = useState<string>('');
-  const [playedVideos, setPlayedVideos] = useState<string[]>([]);
   const [isCrossfading, setIsCrossfading] = useState(false);
   const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const playedVideosRef = useRef<string[]>([]);
 
   // Available videos (you can add more as needed)
   const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
   // Get next video to play
   const getNextVideo = () => {
-    const remaining = availableVideos.filter(video => !playedVideos.includes(video));
+    const remaining = availableVideos.filter(video => !playedVideosRef.current.includes(video));
     
     if (remaining.length === 0) {
       // All videos played, reset and start fresh with new random order
       console.log('All videos played, resetting playlist');
-      setPlayedVideos([]);
+      playedVideosRef.current = [];
       const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-      setPlayedVideos([randomVideo]);
+      playedVideosRef.current.push(randomVideo);
       return randomVideo;
     } else {
       // Pick randomly from remaining videos
       const randomVideo = remaining[Math.floor(Math.random() * remaining.length)];
-      setPlayedVideos(prev => [...prev, randomVideo]);
+      playedVideosRef.current.push(randomVideo);
       return randomVideo;
     }
   };
@@ -169,9 +169,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Initialize with first video
   useEffect(() => {
-    if (playedVideos.length === 0) {
+    if (playedVideosRef.current.length === 0) {
       const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-      setPlayedVideos([firstVideo]);
+      playedVideosRef.current.push(firstVideo);
       setCurrentVideo(firstVideo);
     }
   }, []);
