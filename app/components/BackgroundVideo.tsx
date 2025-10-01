@@ -25,6 +25,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     
     if (remaining.length === 0) {
       // All videos played, reset and start fresh with new random order
+      console.log('All videos played, resetting playlist');
       setPlayedVideos([]);
       const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
       setPlayedVideos([randomVideo]);
@@ -41,32 +42,37 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   const startCrossfadeFromEnd = () => {
     if (isCrossfading || !currentVideoRef.current || !nextVideoRef.current) return;
     
-    const currentVideo = currentVideoRef.current;
-    const nextVideo = nextVideoRef.current;
+    const currentVideoElement = currentVideoRef.current;
+    const nextVideoElement = nextVideoRef.current;
+    const nextVideoName = nextVideo; // Store the next video name
     
     console.log('Starting crossfade from video end, duration:', crossfadeDuration);
     
     setIsCrossfading(true);
     
     // Start the next video playing
-    nextVideo.currentTime = 0;
-    nextVideo.play().catch(console.error);
+    nextVideoElement.currentTime = 0;
+    nextVideoElement.play().catch(console.error);
     
     // Set up crossfade transitions
-    currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
-    nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+    currentVideoElement.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+    nextVideoElement.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
     
     // Start fade out of current video and fade in of next video
-    currentVideo.style.opacity = '0';
-    nextVideo.style.opacity = '1';
+    currentVideoElement.style.opacity = '0';
+    nextVideoElement.style.opacity = '1';
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
-      const nextVideoName = getNextVideo();
-      console.log('Crossfade complete, switching to:', nextVideoName);
+      console.log('Crossfade complete, switching videos');
       
+      // The next video is now the current video
       setCurrentVideo(nextVideoName);
-      setNextVideo('');
+      
+      // Get the next video after this one
+      const nextNextVideo = getNextVideo();
+      setNextVideo(nextNextVideo);
+      
       setIsCrossfading(false);
       
       // Reset styles
