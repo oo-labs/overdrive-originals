@@ -10,8 +10,8 @@ export default function Home() {
     { href: "/race-support", title: "Race Support", subtitle: "E53 4.8is shop truck", external: false },
     { href: "/second-chance-customs", title: "Second Chance Customs", subtitle: "Coming Soon", external: false, comingSoon: true },
     { href: "/store", title: "Store", subtitle: "Parts, merch, more", external: false },
-    { href: youtubeUrl, title: "OO YouTube", subtitle: "Channel", icon: "/youtube.svg", external: true },
-    { href: instagramUrl, title: "Instagram", subtitle: "@overdriveoriginals", icon: "/instagram.svg", external: true },
+    { href: youtubeUrl, title: "OO YouTube", subtitle: "Channel", icon: "/YouTube.svg", external: true },
+    { href: instagramUrl, title: "Instagram", subtitle: "@overdriveoriginals", icon: "/Instagram.svg", external: true },
   ];
 
   return (
