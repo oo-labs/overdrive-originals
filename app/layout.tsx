@@ -16,8 +16,67 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Overdrive Originals",
-  description: "An independent content studio: Race Support, Second Chance Customs, and more.",
+  title: "Overdrive Originals - Independent Automotive Content Studio",
+  description: "Overdrive Originals is an independent automotive content studio featuring Race Support builds, Second Chance Customs, automotive merchandise, and premium automotive content. Discover cutting-edge automotive projects, custom builds, and exclusive automotive content.",
+  keywords: [
+    "automotive content",
+    "race support",
+    "second chance customs", 
+    "automotive builds",
+    "custom cars",
+    "automotive merchandise",
+    "car builds",
+    "automotive projects",
+    "racing content",
+    "automotive studio",
+    "car customization",
+    "automotive media",
+    "overdrive originals",
+    "esse werks",
+    "automotive entertainment"
+  ],
+  authors: [{ name: "Overdrive Originals" }],
+  creator: "Overdrive Originals",
+  publisher: "Overdrive Originals",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: "Overdrive Originals - Independent Automotive Content Studio",
+    description: "Discover cutting-edge automotive projects, custom builds, and exclusive automotive content from Overdrive Originals.",
+    url: "https://overdriveoriginals.com",
+    siteName: "Overdrive Originals",
+    images: [
+      {
+        url: "/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Overdrive Originals Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Overdrive Originals - Independent Automotive Content Studio",
+    description: "Discover cutting-edge automotive projects, custom builds, and exclusive automotive content.",
+    images: ["/android-chrome-512x512.png"],
+  },
+  verification: {
+    google: "your-google-verification-code", // Replace with actual verification code
+  },
+  alternates: {
+    canonical: "https://overdriveoriginals.com",
+  },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -46,6 +105,41 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Overdrive Originals",
+              "description": "An independent automotive content studio featuring Race Support builds, Second Chance Customs, automotive merchandise, and premium automotive content.",
+              "url": "https://overdriveoriginals.com",
+              "logo": "https://overdriveoriginals.com/android-chrome-512x512.png",
+              "sameAs": [
+                "https://youtube.com/@overdriveoriginals",
+                "https://instagram.com/overdriveoriginals"
+              ],
+              "foundingDate": "2024",
+              "industry": "Automotive Content Production",
+              "keywords": [
+                "automotive content",
+                "race support",
+                "second chance customs",
+                "automotive builds",
+                "custom cars",
+                "automotive merchandise"
+              ],
+              "offers": {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Automotive Content Production",
+                  "description": "Premium automotive content, custom builds, and automotive merchandise"
+                }
+              }
+            })
+          }}
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
         {/* Background video */}
