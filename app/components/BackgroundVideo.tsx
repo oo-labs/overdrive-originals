@@ -43,14 +43,21 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       return;
     }
     
+    // Get the next video name from the DOM element src instead of state
     const currentVideoElement = currentVideoRef.current;
     const nextVideoElement = nextVideoRef.current;
-    const nextVideoName = nextVideo; // Store the next video name
+    const nextVideoSrc = nextVideoElement.src;
+    const nextVideoName = nextVideoSrc.split('/').pop() || '';
     
     console.log('🔄 Starting crossfade from video end, duration:', crossfadeDuration);
     console.log('🔄 Current video element:', currentVideoElement.src);
     console.log('🔄 Next video element:', nextVideoElement.src);
-    console.log('🔄 Next video name:', nextVideoName);
+    console.log('🔄 Next video name from src:', nextVideoName);
+    
+    if (!nextVideoName) {
+      console.log('🔄 Crossfade blocked - no next video name found');
+      return;
+    }
     
     setIsCrossfading(true);
     
