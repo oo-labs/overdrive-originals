@@ -34,15 +34,6 @@ export default function RootLayout({
         {/* Background video */}
         <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1000 }}>
           <BackgroundVideo videoDuration={videoDuration} crossfadeDuration={crossfadeDuration} />
-          {/* Animated gradient fallback overlay - only visible during initial load */}
-          <div 
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" 
-            style={{ 
-              zIndex: -999,
-              display: 'block' // Will be hidden by video component once loaded
-            }} 
-            id="bg-fallback"
-          />
         </div>
 
         {/* Floating brand logo - viewport top */}

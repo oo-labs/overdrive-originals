@@ -1,328 +1,246 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { VideoPreloader } from './VideoPreloader';
 
 interface BackgroundVideoProps {
   videoDuration: number;
   crossfadeDuration: number;
 }
 
-// Available videos (you can add more as needed)
+// Available videos from /bg folder
 const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
 export default function BackgroundVideo({ videoDuration, crossfadeDuration }: BackgroundVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentVideoRef = useRef<HTMLVideoElement>(null);
   const nextVideoRef = useRef<HTMLVideoElement>(null);
-  const [currentVideo, setCurrentVideo] = useState<string>('bg_01.mp4');
-  const [isCrossfading, setIsCrossfading] = useState(false);
-  const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastTimeUpdateRef = useRef<number>(0);
   
-  // Video preloader and playlist management
-  const preloaderRef = useRef<VideoPreloader | null>(null);
-  const playlistRef = useRef<string[]>([]);
-  const currentIndexRef = useRef(0);
-
-  // Generate a 25-slot playlist (5x the number of available videos)
+  // State management
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [playlist, setPlaylist] = useState<string[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Generate playlist: 5x the number of available videos
   const generatePlaylist = useCallback(() => {
     const newPlaylist: string[] = [];
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < availableVideos.length * 5; i++) {
       const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
       newPlaylist.push(randomVideo);
     }
     return newPlaylist;
   }, []);
 
-  // Get next video from playlist
-  const getNextVideoFromPlaylist = () => {
-    const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length;
-    const nextVideo = playlistRef.current[nextIndex];
-    console.log('🎵 Getting next video - current index:', currentIndexRef.current, 'next index:', nextIndex, 'next video:', nextVideo);
-    return nextVideo;
-  };
+  // Initialize playlist and first video
+  useEffect(() => {
+    const newPlaylist = generatePlaylist();
+    setPlaylist(newPlaylist);
+    console.log('🎬 Playlist generated:', newPlaylist.length, 'videos');
+  }, [generatePlaylist]);
 
-  // Start crossfade using preloaded video
-  const startCrossfadeFromEnd = useCallback(async () => {
-    console.log('🔄 Crossfade attempt - isCrossfading:', isCrossfading);
-    
-    if (isCrossfading || !preloaderRef.current || !containerRef.current) {
-      console.log('🔄 Crossfade blocked');
-      return;
-    }
-    
-    const preloader = preloaderRef.current;
-    const nextVideoName = getNextVideoFromPlaylist();
-    
-    console.log('🔄 Next video name:', nextVideoName);
-    
-    if (!nextVideoName) {
-      console.log('🔄 No next video name found');
-      return;
-    }
-    
-    // Get preloaded video
-    const nextVideoElement = preloader.getVideo(nextVideoName);
-    
-    if (!nextVideoElement) {
-      console.log('🔄 Next video not preloaded, preloading now...');
-      try {
-        await preloader.preloadVideo(nextVideoName);
-        const loadedVideo = preloader.getVideo(nextVideoName);
-        if (loadedVideo) {
-          // Move to container
-          preloader.moveVideoToContainer(nextVideoName, containerRef.current);
-          nextVideoRef.current = loadedVideo;
-        } else {
-          console.error('🔄 Failed to get preloaded video');
-          return;
-        }
-      } catch (error) {
-        console.error('🔄 Failed to preload next video:', error);
-        return;
+  // Get next video from playlist
+  const getNextVideo = useCallback(() => {
+    const nextIndex = (currentVideoIndex + 1) % playlist.length;
+    return playlist[nextIndex];
+  }, [currentVideoIndex, playlist]);
+
+  // Preload a video
+  const preloadVideo = useCallback((videoSrc: string): Promise<HTMLVideoElement> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.src = `/bg/${videoSrc}`;
+      video.muted = true;
+      video.playsInline = true;
+      video.loop = false;
+      video.preload = 'auto';
+      video.crossOrigin = 'anonymous';
+      
+      // Style the video
+      video.style.position = 'absolute';
+      video.style.top = '0';
+      video.style.left = '0';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'cover';
+      video.style.opacity = '0';
+      video.style.zIndex = '1';
+      video.style.willChange = 'opacity';
+      video.style.transform = 'translateZ(0)';
+      video.style.backfaceVisibility = 'hidden';
+      
+      // Add to container
+      if (containerRef.current) {
+        containerRef.current.appendChild(video);
       }
-    } else {
-      // Move preloaded video to container
-      preloader.moveVideoToContainer(nextVideoName, containerRef.current);
-      nextVideoRef.current = nextVideoElement;
-    }
+      
+      const handleCanPlayThrough = () => {
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        video.removeEventListener('error', handleError);
+        console.log('✅ Video preloaded:', videoSrc);
+        resolve(video);
+      };
+      
+      const handleError = (e: Event) => {
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        video.removeEventListener('error', handleError);
+        console.error('❌ Failed to preload video:', videoSrc, e);
+        reject(e);
+      };
+      
+      video.addEventListener('canplaythrough', handleCanPlayThrough);
+      video.addEventListener('error', handleError);
+    });
+  }, []);
+
+  // Start transition to next video
+  const startTransition = useCallback(async () => {
+    if (isTransitioning || !currentVideoRef.current) return;
     
-    if (!nextVideoRef.current || !currentVideoRef.current) {
-      console.log('🔄 Video elements not ready');
-      return;
-    }
+    const nextVideoSrc = getNextVideo();
+    console.log('🔄 Starting transition to:', nextVideoSrc);
     
-    // Ensure the next video is properly positioned and styled
-    nextVideoRef.current.style.position = 'absolute';
-    nextVideoRef.current.style.top = '0';
-    nextVideoRef.current.style.left = '0';
-    nextVideoRef.current.style.width = '100%';
-    nextVideoRef.current.style.height = '100%';
-    nextVideoRef.current.style.objectFit = 'cover';
-    nextVideoRef.current.style.opacity = '1'; // Start visible since it's already playing
-    nextVideoRef.current.style.zIndex = '0';
-    nextVideoRef.current.style.willChange = 'opacity';
-    nextVideoRef.current.style.transform = 'translateZ(0)';
-    nextVideoRef.current.style.backfaceVisibility = 'hidden';
-    nextVideoRef.current.style.isolation = 'isolate';
+    setIsTransitioning(true);
     
-    console.log('🔄 Starting crossfade with preloaded video');
-    setIsCrossfading(true);
-    
-    // Ensure background fallback stays hidden during crossfade
-    const fallback = document.getElementById('bg-fallback');
-    if (fallback) {
-      fallback.style.display = 'none';
-    }
-    
-    // Start the next video playing immediately
-    nextVideoRef.current.currentTime = 0;
-    nextVideoRef.current.play().catch(console.error);
-    
-    // Wait for the next video to actually start playing before beginning crossfade
-    const waitForVideoToPlay = () => {
-      if (nextVideoRef.current && nextVideoRef.current.readyState >= 3 && !nextVideoRef.current.paused) {
-        console.log('🔄 Next video is playing, starting crossfade');
+    try {
+      // Preload the next video
+      const nextVideo = await preloadVideo(nextVideoSrc);
+      nextVideoRef.current = nextVideo;
+      
+      // Start playing the next video immediately (behind current video)
+      nextVideo.currentTime = 0;
+      await nextVideo.play();
+      
+      // Set up crossfade: fade out current video
+      if (currentVideoRef.current) {
+        currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s ease-out`;
+        currentVideoRef.current.style.opacity = '0';
+      }
+      
+      // After crossfade completes, clean up and move to next video
+      setTimeout(() => {
+        console.log('✅ Transition complete');
         
-        // Set up crossfade transition - only fade out current video
-        if (currentVideoRef.current) {
-          currentVideoRef.current.style.transition = `opacity ${crossfadeDuration}s cubic-bezier(0.4, 0, 0.2, 1)`;
-          
-          // Force GPU acceleration
-          currentVideoRef.current.style.willChange = 'opacity';
-          
-          // Use requestAnimationFrame to ensure smooth transition start
-          requestAnimationFrame(() => {
-            // Only fade out the current video - next video is already visible and playing
-            if (currentVideoRef.current) {
-              currentVideoRef.current.style.opacity = '0';
-            }
-          });
+        // Remove old current video
+        if (currentVideoRef.current && currentVideoRef.current.parentNode) {
+          currentVideoRef.current.parentNode.removeChild(currentVideoRef.current);
         }
-      } else {
-        // Check again in 50ms
-        setTimeout(waitForVideoToPlay, 50);
-      }
-    };
-    
-    // Start checking for video readiness
-    setTimeout(waitForVideoToPlay, 50);
-    
-    // After crossfade completes, switch to next video
-    crossfadeTimeoutRef.current = setTimeout(() => {
-      console.log('✅ Crossfade complete, switching to:', nextVideoName);
-      
-      // Update playlist index
-      currentIndexRef.current = (currentIndexRef.current + 1) % playlistRef.current.length;
-      console.log('✅ New playlist index:', currentIndexRef.current);
-      
-      // The next video is now the current video - swap the refs instead of re-rendering
-      if (nextVideoRef.current) {
-        // Make the next video the current video by updating its styles
-        nextVideoRef.current.style.transition = '';
-        nextVideoRef.current.style.willChange = 'auto';
-        nextVideoRef.current.style.zIndex = '10';
         
-        // Update the current video ref to point to the next video
-        currentVideoRef.current = nextVideoRef.current;
-        nextVideoRef.current = null;
-      }
+        // Make next video the current video
+        if (nextVideoRef.current) {
+          nextVideoRef.current.style.opacity = '1';
+          nextVideoRef.current.style.transition = '';
+          nextVideoRef.current.style.zIndex = '2';
+          currentVideoRef.current = nextVideoRef.current;
+          nextVideoRef.current = null;
+        }
+        
+        // Update playlist index
+        setCurrentVideoIndex(prev => (prev + 1) % playlist.length);
+        setIsTransitioning(false);
+        
+        // Hide loading screen if it was showing
+        setIsLoading(false);
+      }, crossfadeDuration * 1000);
       
-      // Update the state to reflect the new current video (but don't re-render the video element)
-      setCurrentVideo(nextVideoName);
-      
-      // Clean up unused videos and preload next videos in the background
-      preloader.cleanupUnusedVideos(playlistRef.current, currentIndexRef.current);
-      preloader.preloadPlaylist(playlistRef.current, currentIndexRef.current).catch(console.error);
-      
-      setIsCrossfading(false);
-      crossfadeTimeoutRef.current = null;
-    }, crossfadeDuration * 1000 + 200); // Add buffer for video startup time
-  }, [crossfadeDuration, isCrossfading]);
+    } catch (error) {
+      console.error('❌ Transition failed:', error);
+      setIsTransitioning(false);
+    }
+  }, [isTransitioning, getNextVideo, preloadVideo, crossfadeDuration, playlist.length]);
 
   // Handle current video events
   useEffect(() => {
-    if (currentVideoRef.current && preloaderRef.current) {
-      const video = currentVideoRef.current;
-      const preloader = preloaderRef.current;
-      
-      const handleLoadedData = () => {
-        console.log('📹 Current video loaded:', currentVideo);
-        video.currentTime = 0;
-        video.play().catch(console.error);
-        
-        // Hide the background fallback once video is loaded
-        const fallback = document.getElementById('bg-fallback');
-        if (fallback) {
-          fallback.style.display = 'none';
+    if (!currentVideoRef.current || !playlist.length) return;
+    
+    const video = currentVideoRef.current;
+    
+    const handleLoadedData = () => {
+      console.log('📹 Current video loaded:', playlist[currentVideoIndex]);
+      video.currentTime = 0;
+      video.play().catch(console.error);
+      setIsLoading(false);
+    };
+    
+    const handleTimeUpdate = () => {
+      if (videoDuration === 0) {
+        // For complete videos, start transition when near the end
+        const timeUntilEnd = video.duration - video.currentTime;
+        const transitionBuffer = crossfadeDuration + 0.5; // 500ms buffer
+        if (timeUntilEnd <= transitionBuffer && !isTransitioning) {
+          console.log('⏰ Video near end, starting transition');
+          startTransition();
         }
-        
-        // Preload next videos in the background
-        preloader.preloadPlaylist(playlistRef.current, currentIndexRef.current).catch(console.error);
-      };
-
-      const handleTimeUpdate = () => {
-        // Throttle time update checks to reduce performance impact
-        const now = Date.now();
-        if (now - lastTimeUpdateRef.current < 100) { // Check every 100ms max
-          return;
+      } else {
+        // For timed videos, start transition when time is up
+        if (video.currentTime >= videoDuration && !isTransitioning) {
+          console.log('⏰ Video duration reached, starting transition');
+          startTransition();
         }
-        lastTimeUpdateRef.current = now;
-        
-        if (videoDuration === 0) {
-          // For complete videos, start crossfade when video is near the end
-          // Add buffer to ensure crossfade completes before video ends
-          const timeUntilEnd = video.duration - video.currentTime;
-          const crossfadeBuffer = crossfadeDuration + 0.5; // Add 500ms buffer for video startup
-          if (timeUntilEnd <= crossfadeBuffer && !isCrossfading) {
-            console.log('⏰ Video near end, starting crossfade. Time until end:', timeUntilEnd, 'Crossfade duration:', crossfadeDuration, 'Buffer:', crossfadeBuffer);
-            startCrossfadeFromEnd();
-          }
-        } else {
-          // For timed videos, start crossfade when time is up
-          if (video.currentTime >= videoDuration && !isCrossfading) {
-            console.log('⏰ Video duration reached, starting crossfade. Current time:', video.currentTime, 'Duration:', videoDuration);
-            startCrossfadeFromEnd();
-          }
-        }
-      };
-
-      const handleEnded = () => {
-        if (videoDuration === 0 && !isCrossfading) {
-          console.log('Video ended naturally, starting crossfade');
-          startCrossfadeFromEnd();
-        }
-      };
-
-      const handleError = (e: Event) => {
-        console.error('Video error:', e);
-        startCrossfadeFromEnd();
-      };
-
-      video.addEventListener('loadeddata', handleLoadedData);
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('ended', handleEnded);
-      video.addEventListener('error', handleError);
-
-      return () => {
-        video.removeEventListener('loadeddata', handleLoadedData);
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('ended', handleEnded);
-        video.removeEventListener('error', handleError);
-        // Don't clear crossfade timeout during cleanup - let it complete
-        // The crossfade timeout will be cleared when the crossfade actually completes
-      };
-    }
-  }, [currentVideo, videoDuration, crossfadeDuration, isCrossfading, startCrossfadeFromEnd]);
-
-  // Initialize preloader
-  useEffect(() => {
-    if (!preloaderRef.current) {
-      preloaderRef.current = new VideoPreloader('/bg/', {
-        maxPreloadedVideos: 3,
-        preloadDistance: 2
-      });
-      
-      console.log('🎬 Video preloader initialized');
-      
-      // Set up periodic cleanup
-      const cleanupInterval = setInterval(() => {
-        if (preloaderRef.current) {
-          preloaderRef.current.cleanup();
-          const memoryInfo = preloaderRef.current.getMemoryInfo();
-          console.log('🧹 Memory cleanup - loaded:', memoryInfo.loadedVideos, 'loading:', memoryInfo.loadingVideos);
-        }
-      }, 30000); // Clean up every 30 seconds
-      
-      return () => {
-        clearInterval(cleanupInterval);
-        // Clean up preloader on unmount
-        if (preloaderRef.current) {
-          preloaderRef.current.destroy();
-          preloaderRef.current = null;
-        }
-      };
-    }
-  }, []);
-
-  // Initialize playlist and first video
-  useEffect(() => {
-    if (preloaderRef.current) {
-      const newPlaylist = generatePlaylist();
-      playlistRef.current = newPlaylist;
-      
-      const firstVideo = newPlaylist[0];
-      setCurrentVideo(firstVideo);
-      
-      // Preload the first few videos
-      preloaderRef.current.preloadPlaylist(newPlaylist, 0).catch(console.error);
-    }
-  }, [generatePlaylist]);
+      }
+    };
+    
+    const handleEnded = () => {
+      if (videoDuration === 0 && !isTransitioning) {
+        console.log('📹 Video ended naturally, starting transition');
+        startTransition();
+      }
+    };
+    
+    const handleError = (e: Event) => {
+      console.error('❌ Video error:', e);
+      startTransition();
+    };
+    
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('ended', handleEnded);
+    video.addEventListener('error', handleError);
+    
+    return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('error', handleError);
+    };
+  }, [currentVideoIndex, playlist, videoDuration, crossfadeDuration, isTransitioning, startTransition]);
 
   return (
-    <div ref={containerRef} className="relative h-full w-full" style={{ zIndex: 1 }}>
-      {/* Current video (on top) - always render, manage via preloader during crossfades */}
-      <video
-        ref={currentVideoRef}
-        key={currentVideo}
-        className="absolute inset-0 h-full w-full object-cover"
-        muted
-        playsInline
-        autoPlay
-        loop={false}
-        preload="auto"
-        crossOrigin="anonymous"
-        poster="/bg-poster.jpg"
-        style={{ 
-          zIndex: 10,
-          willChange: 'opacity',
-          transform: 'translateZ(0)',
-          backfaceVisibility: 'hidden',
-          isolation: 'isolate'
-        } as React.CSSProperties}
-        src={`/bg/${currentVideo}`}
-      />
+    <div className="relative h-full w-full">
+      {/* Loading screen - only shown during initial load */}
+      {isLoading && (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60 flex items-center justify-center"
+          style={{ zIndex: 999 }}
+        >
+          <div className="text-white text-lg">Loading...</div>
+        </div>
+      )}
+      
+      {/* Video container */}
+      <div ref={containerRef} className="relative h-full w-full">
+        {/* Current video */}
+        {playlist.length > 0 && (
+          <video
+            ref={currentVideoRef}
+            key={playlist[currentVideoIndex]}
+            className="absolute inset-0 h-full w-full object-cover"
+            muted
+            playsInline
+            autoPlay
+            loop={false}
+            preload="auto"
+            crossOrigin="anonymous"
+            poster="/bg-poster.jpg"
+            style={{ 
+              zIndex: 2,
+              willChange: 'opacity',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+            src={`/bg/${playlist[currentVideoIndex]}`}
+          />
+        )}
+      </div>
     </div>
   );
 }
