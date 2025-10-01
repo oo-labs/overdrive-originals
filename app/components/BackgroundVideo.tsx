@@ -40,7 +40,10 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Start crossfade from video end
   const startCrossfadeFromEnd = () => {
+    console.log('🔄 Crossfade attempt - isCrossfading:', isCrossfading, 'currentVideo:', !!currentVideoRef.current, 'nextVideo:', !!nextVideoRef.current);
+    
     if (isCrossfading || !currentVideoRef.current || !nextVideoRef.current) {
+      console.log('🔄 Crossfade blocked');
       return;
     }
     
@@ -49,12 +52,16 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
     const nextVideoSrc = nextVideoElement.src;
     const nextVideoName = nextVideoSrc.split('/').pop() || '';
     
+    console.log('🔄 Next video name:', nextVideoName, 'readyState:', nextVideoElement.readyState);
+    
     if (!nextVideoName) {
+      console.log('🔄 No next video name found');
       return;
     }
     
     // Simple check - if video can play, start crossfade
     if (nextVideoElement.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+      console.log('🔄 Starting crossfade');
       setIsCrossfading(true);
       
       // Start the next video playing
@@ -68,18 +75,24 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // Start fade out of current video and fade in of next video
       currentVideoElement.style.opacity = '0';
       nextVideoElement.style.opacity = '1';
+    } else {
+      console.log('🔄 Next video not ready, readyState:', nextVideoElement.readyState);
     }
     
     // After crossfade completes, switch to next video
     crossfadeTimeoutRef.current = setTimeout(() => {
+      console.log('✅ Crossfade complete, switching to:', nextVideoName);
+      
       // Update playlist index
       currentIndexRef.current = (currentIndexRef.current + 1) % playlistRef.current.length;
+      console.log('✅ New playlist index:', currentIndexRef.current);
       
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
       
       // Get the next video from playlist
       const nextNextVideo = getNextVideoFromPlaylist();
+      console.log('✅ Next video after switch:', nextNextVideo);
       setNextVideo(nextNextVideo);
       
       setIsCrossfading(false);
@@ -103,11 +116,13 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       const video = currentVideoRef.current;
       
       const handleLoadedData = () => {
+        console.log('📹 Current video loaded:', currentVideo);
         video.currentTime = 0;
         video.play().catch(console.error);
         
         // Pre-load the next video from playlist
         const nextVideoName = getNextVideoFromPlaylist();
+        console.log('📹 Setting next video to:', nextVideoName);
         setNextVideo(nextVideoName);
       };
 
@@ -158,16 +173,20 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   // Handle next video loading
   useEffect(() => {
+    console.log('🎯 Next video effect - nextVideo:', nextVideo, 'isCrossfading:', isCrossfading);
     if (nextVideoRef.current && nextVideo && !isCrossfading) {
       const video = nextVideoRef.current;
+      console.log('🎯 Setting up next video:', nextVideo);
       
       const handleLoadedData = () => {
+        console.log('🎯 Next video loaded:', nextVideo);
         video.style.opacity = '0.5';
       };
 
       video.addEventListener('loadeddata', handleLoadedData);
       
       return () => {
+        console.log('🎯 Cleaning up next video:', nextVideo);
         video.removeEventListener('loadeddata', handleLoadedData);
       };
     }
