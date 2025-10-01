@@ -8,119 +8,95 @@ interface BackgroundVideoProps {
 
 export default function BackgroundVideo({ videoDuration }: BackgroundVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [availableVideos, setAvailableVideos] = useState<string[]>([]);
+  const [currentVideo, setCurrentVideo] = useState<string>('bg_01.mp4');
   const [playedVideos, setPlayedVideos] = useState<string[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate list of available videos (bg_01.mp4, bg_02.mp4, etc.)
-  useEffect(() => {
-    const videos: string[] = [];
-    for (let i = 1; i <= 99; i++) {
-      const num = i.toString().padStart(2, '0');
-      videos.push(`bg_${num}.mp4`);
-    }
-    setAvailableVideos(videos);
-  }, []);
-
-  // Shuffle array function
-  const shuffleArray = (array: string[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
+  // Available videos (you can add more as needed)
+  const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
   // Get next video to play
   const getNextVideo = () => {
-    if (playedVideos.length === 0) {
-      // First time or all videos played, shuffle and start fresh
-      const shuffled = shuffleArray(availableVideos);
-      setPlayedVideos([shuffled[0]]);
-      return shuffled[0];
-    } else if (playedVideos.length < availableVideos.length) {
-      // Still have unplayed videos, pick randomly from remaining
-      const remaining = availableVideos.filter(video => !playedVideos.includes(video));
+    const remaining = availableVideos.filter(video => !playedVideos.includes(video));
+    
+    if (remaining.length === 0) {
+      // All videos played, reset and start fresh
+      setPlayedVideos([]);
+      const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+      setPlayedVideos([randomVideo]);
+      return randomVideo;
+    } else {
+      // Pick randomly from remaining videos
       const randomVideo = remaining[Math.floor(Math.random() * remaining.length)];
       setPlayedVideos(prev => [...prev, randomVideo]);
       return randomVideo;
-    } else {
-      // All videos played, reset and shuffle
-      const shuffled = shuffleArray(availableVideos);
-      setPlayedVideos([shuffled[0]]);
-      return shuffled[0];
     }
   };
 
-  // Handle video end and switch to next video
-  const handleVideoEnd = () => {
+  // Switch to next video
+  const switchToNextVideo = () => {
     const nextVideo = getNextVideo();
-    if (videoRef.current) {
-      videoRef.current.src = `/bg/${nextVideo}`;
-      videoRef.current.load();
-      
-      // Wait for video to be ready before playing
-      const handleCanPlay = () => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(console.error);
-        }
-      };
-      
-      videoRef.current.addEventListener('canplay', handleCanPlay, { once: true });
-    }
+    setCurrentVideo(nextVideo);
   };
 
-  // Set initial video
-  useEffect(() => {
-    if (availableVideos.length > 0 && videoRef.current) {
-      const initialVideo = getNextVideo();
-      videoRef.current.src = `/bg/${initialVideo}`;
-      videoRef.current.load();
-      
-      // Wait for video to be ready before playing
-      const handleCanPlay = () => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(console.error);
-        }
-      };
-      
-      videoRef.current.addEventListener('canplay', handleCanPlay);
-      
-      return () => {
-        if (videoRef.current) {
-          videoRef.current.removeEventListener('canplay', handleCanPlay);
-        }
-      };
-    }
-  }, [availableVideos]);
-
-  // Set video duration
+  // Handle video load and play
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.addEventListener('loadedmetadata', () => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          // Let the video play for the specified duration, then switch
-          setTimeout(() => {
-            handleVideoEnd();
-          }, videoDuration * 1000);
+      const video = videoRef.current;
+      
+      const handleLoadedData = () => {
+        video.currentTime = 0;
+        video.play().catch(console.error);
+        
+        // Set timeout to switch video after specified duration
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
         }
-      });
+        timeoutRef.current = setTimeout(() => {
+          switchToNextVideo();
+        }, videoDuration * 1000);
+      };
+
+      const handleError = (e: Event) => {
+        console.error('Video error:', e);
+        // Try next video on error
+        switchToNextVideo();
+      };
+
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('error', handleError);
+
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('error', handleError);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
     }
-  }, [videoDuration]);
+  }, [currentVideo, videoDuration]);
+
+  // Initialize with first video
+  useEffect(() => {
+    if (playedVideos.length === 0) {
+      const firstVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+      setPlayedVideos([firstVideo]);
+      setCurrentVideo(firstVideo);
+    }
+  }, []);
 
   return (
     <video
       ref={videoRef}
+      key={currentVideo} // Force re-render when video changes
       className="h-full w-full object-cover"
       muted
       playsInline
       autoPlay
       loop={false}
-      onEnded={handleVideoEnd}
       onError={(e) => console.error('Video error:', e)}
       poster="/bg-poster.jpg"
+      src={`/bg/${currentVideo}`}
     />
   );
 }
