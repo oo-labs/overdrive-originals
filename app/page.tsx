@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <main className="relative z-10 mx-auto max-w-6xl px-4 pb-16">
       <section className="mt-6 sm:mt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {tiles.map((tile) => (
             tile.external ? (
               <a
@@ -25,36 +25,32 @@ export default function Home() {
                 href={tile.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`glass group block p-5 sm:p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
+                className={`glass group block aspect-square p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center justify-center h-full text-center">
                   {tile.icon ? (
-                    <Image src={tile.icon} alt="" width={24} height={24} className="opacity-90" />
+                    <Image src={tile.icon} alt="" width={48} height={48} className="opacity-90 mb-4" />
                   ) : (
-                    <div className="h-6 w-6 rounded-md bg-white/20" />
+                    <div className="h-12 w-12 rounded-md bg-white/20 mb-4" />
                   )}
-                  <div>
-                    <div className="text-white font-semibold tracking-wide">{tile.title}</div>
-                    <div className="text-white/70 text-sm">{tile.subtitle}</div>
-                  </div>
+                  <div className="text-white font-bold text-lg tracking-wide mb-1">{tile.title}</div>
+                  <div className="text-white/60 text-xs">{tile.subtitle}</div>
                 </div>
               </a>
             ) : (
               <Link
                 key={tile.title}
                 href={tile.href}
-                className={`glass group block p-5 sm:p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
+                className={`glass group block aspect-square p-6 transition hover:bg-white/15 ${tile.comingSoon ? "opacity-80" : ""}`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center justify-center h-full text-center">
                   {tile.icon ? (
-                    <Image src={tile.icon} alt="" width={24} height={24} className="opacity-90" />
+                    <Image src={tile.icon} alt="" width={48} height={48} className="opacity-90 mb-4" />
                   ) : (
-                    <div className="h-6 w-6 rounded-md bg-white/20" />
+                    <div className="h-12 w-12 rounded-md bg-white/20 mb-4" />
                   )}
-                  <div>
-                    <div className="text-white font-semibold tracking-wide">{tile.title}</div>
-                    <div className="text-white/70 text-sm">{tile.subtitle}</div>
-                  </div>
+                  <div className="text-white font-bold text-lg tracking-wide mb-1">{tile.title}</div>
+                  <div className="text-white/60 text-xs">{tile.subtitle}</div>
                 </div>
               </Link>
             )

@@ -37,13 +37,13 @@ export default function RootLayout({
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>
 
-        {/* Glass top brand bar */}
+        {/* Floating brand logo */}
         <header className="fixed top-0 left-0 right-0 z-10">
-          <div className="mx-auto max-w-6xl px-4 py-4">
-            <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 backdrop-blur-md px-4 py-2 text-white">
-              <Link href="/" className="inline-flex items-center gap-3">
-                <Image src="/oo.svg" alt="Overdrive Originals" width={28} height={28} />
-                <span className="text-lg font-semibold tracking-wide">Overdrive Originals</span>
+          <div className="mx-auto max-w-6xl px-4 py-8">
+            <div className="flex justify-center">
+              <Link href="/" className="inline-flex items-center gap-4 text-white hover:opacity-80 transition-opacity">
+                <Image src="/oo.svg" alt="Overdrive Originals" width={64} height={64} />
+                <span className="text-2xl font-bold tracking-wide">Overdrive Originals</span>
               </Link>
             </div>
           </div>
@@ -55,12 +55,10 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="relative z-10 mt-24">
           <div className="mx-auto max-w-6xl px-4 pb-10">
-            <div className="rounded-xl border border-white/10 bg-white/10 backdrop-blur-md px-4 py-4 text-white/80">
-              <div className="text-xs leading-relaxed">
-                © {new Date().getFullYear()} Overdrive Originals by Esse Werks. All rights reserved.
-                <br />
-                This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
-              </div>
+            <div className="text-center text-white/70 text-sm leading-relaxed">
+              © {new Date().getFullYear()} Overdrive Originals by Esse Werks. All rights reserved.
+              <br />
+              This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
             </div>
           </div>
         </footer>
