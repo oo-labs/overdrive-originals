@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import BackgroundVideo from "./components/BackgroundVideo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,15 +25,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const videoDuration = parseFloat(process.env.NEXT_PUBLIC_BG_VIDEO_DURATION || "6.0");
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
         {/* Background video */}
         <div className="fixed inset-0 -z-20 overflow-hidden">
-          <video className="h-full w-full object-cover" autoPlay loop muted playsInline poster="/bg-poster.jpg">
-            <source src="/bg.webm" type="video/webm" />
-            <source src="/bg.mp4" type="video/mp4" />
-          </video>
+          <BackgroundVideo videoDuration={videoDuration} />
           {/* Animated gradient fallback overlay */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>
