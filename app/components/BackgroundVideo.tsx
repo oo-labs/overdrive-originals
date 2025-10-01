@@ -35,7 +35,9 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   // Get next video from playlist
   const getNextVideoFromPlaylist = () => {
     const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length;
-    return playlistRef.current[nextIndex];
+    const nextVideo = playlistRef.current[nextIndex];
+    console.log('🎵 Getting next video - current index:', currentIndexRef.current, 'next index:', nextIndex, 'next video:', nextVideo);
+    return nextVideo;
   };
 
   // Start crossfade from video end
@@ -59,8 +61,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       return;
     }
     
-    // Simple check - if video can play, start crossfade
-    if (nextVideoElement.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+    // Wait for next video to be fully ready
+    if (nextVideoElement.readyState >= 4) { // HAVE_ENOUGH_DATA
       console.log('🔄 Starting crossfade');
       setIsCrossfading(true);
       
@@ -76,7 +78,15 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       currentVideoElement.style.opacity = '0';
       nextVideoElement.style.opacity = '1';
     } else {
-      console.log('🔄 Next video not ready, readyState:', nextVideoElement.readyState);
+      console.log('🔄 Next video not ready, readyState:', nextVideoElement.readyState, 'waiting for canplaythrough');
+      // Wait for the video to be ready
+      const handleCanPlayThrough = () => {
+        nextVideoElement.removeEventListener('canplaythrough', handleCanPlayThrough);
+        console.log('🔄 Next video now ready, starting crossfade');
+        startCrossfadeFromEnd(); // Retry the crossfade
+      };
+      nextVideoElement.addEventListener('canplaythrough', handleCanPlayThrough);
+      return; // Exit early, will retry when ready
     }
     
     // After crossfade completes, switch to next video
@@ -178,16 +188,22 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       const video = nextVideoRef.current;
       console.log('🎯 Setting up next video:', nextVideo);
       
-      const handleLoadedData = () => {
-        console.log('🎯 Next video loaded:', nextVideo);
+      const handleCanPlayThrough = () => {
+        console.log('🎯 Next video fully ready:', nextVideo, 'readyState:', video.readyState);
         video.style.opacity = '0.5';
       };
 
+      const handleLoadedData = () => {
+        console.log('🎯 Next video loaded:', nextVideo, 'readyState:', video.readyState);
+      };
+
       video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplaythrough', handleCanPlayThrough);
       
       return () => {
         console.log('🎯 Cleaning up next video:', nextVideo);
         video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
       };
     }
   }, [nextVideo, isCrossfading]);
@@ -212,7 +228,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           muted
           playsInline
           loop={false}
-          preload="metadata"
+          preload="auto"
           src={`/bg/${nextVideo}`}
         />
       )}
@@ -226,7 +242,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         playsInline
         autoPlay
         loop={false}
-        preload="metadata"
+        preload="auto"
         poster="/bg-poster.jpg"
         src={`/bg/${currentVideo}`}
       />
