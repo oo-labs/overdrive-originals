@@ -235,6 +235,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           playsInline
           loop={false}
           preload="auto"
+          crossOrigin="anonymous"
           style={{ 
             willChange: 'opacity',
             transform: 'translateZ(0)',
@@ -254,6 +255,7 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         autoPlay
         loop={false}
         preload="auto"
+        crossOrigin="anonymous"
         poster="/bg-poster.jpg"
         style={{ 
           willChange: 'opacity',
