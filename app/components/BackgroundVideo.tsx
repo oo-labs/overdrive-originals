@@ -84,53 +84,45 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
       return;
     }
     
-    // Start playing next video
+    // Set next video source and start playing immediately
     nextVideo.src = nextVideoSrc;
     nextVideo.currentTime = 0;
     nextVideo.play().catch(console.error);
     
-    // Wait for next video to start playing, then fade
-    const handleCanPlay = () => {
-      nextVideo.removeEventListener('canplay', handleCanPlay);
-      
-      console.log('🎬 Next video started playing, starting fade');
-      
-      // Fade out current video (video1)
-      currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
-      currentVideo.style.opacity = '0';
-      
-      // Fade in next video (video2)
-      nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in`;
-      nextVideo.style.opacity = '1';
-      
-      // After fade completes, swap videos
-      setTimeout(() => {
-        console.log('✅ Transition complete, swapping videos');
-        
-        // Swap video sources
-        const tempSrc = currentVideo.src;
-        currentVideo.src = nextVideo.src;
-        nextVideo.src = tempSrc;
-        
-        // Reset styles
-        currentVideo.style.transition = '';
-        currentVideo.style.opacity = '1';
-        nextVideo.style.transition = '';
-        nextVideo.style.opacity = '0';
-        
-        // Update index
-        setCurrentVideoIndex(nextIndex);
-        setIsTransitioning(false);
-        
-        // Load next video for next transition
-        const nextNextIndex = (nextIndex + 1) % videoSources.length;
-        nextVideo.src = videoSources[nextNextIndex];
-        nextVideo.load();
-        
-      }, crossfadeDuration * 1000);
-    };
+    console.log('🎬 Both videos now playing simultaneously');
     
-    nextVideo.addEventListener('canplay', handleCanPlay);
+    // Start fade immediately - both videos are playing
+    currentVideo.style.transition = `opacity ${crossfadeDuration}s ease-out`;
+    currentVideo.style.opacity = '0';
+    
+    nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in`;
+    nextVideo.style.opacity = '1';
+    
+    // After fade completes, swap videos
+    setTimeout(() => {
+      console.log('✅ Transition complete, swapping videos');
+      
+      // Swap video sources
+      const tempSrc = currentVideo.src;
+      currentVideo.src = nextVideo.src;
+      nextVideo.src = tempSrc;
+      
+      // Reset styles
+      currentVideo.style.transition = '';
+      currentVideo.style.opacity = '1';
+      nextVideo.style.transition = '';
+      nextVideo.style.opacity = '0';
+      
+      // Update index
+      setCurrentVideoIndex(nextIndex);
+      setIsTransitioning(false);
+      
+      // Load next video for next transition
+      const nextNextIndex = (nextIndex + 1) % videoSources.length;
+      nextVideo.src = videoSources[nextNextIndex];
+      nextVideo.load();
+      
+    }, crossfadeDuration * 1000);
   }, [currentVideoIndex, videoSources, crossfadeDuration, isTransitioning]);
 
   // Handle video events
