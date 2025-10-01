@@ -6,7 +6,7 @@ export default function Home() {
   const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com";
   const tiles = [
     { href: "/about", title: "About", subtitle: "", icon: "/about.svg", external: false },
-    { href: "/race-support", title: "Race Support", subtitle: "Esse Werks Shop Truck Build", icon: "/racesupport.svg", external: false },
+    { href: "/race-support", title: "Race Support", subtitle: "Esse Werks Shop Build", icon: "/racesupport.svg", external: false },
     { href: "/second-chance-customs", title: "Second Chance", subtitle: "Coming Soon", icon: "/scc.svg", external: false, static: true },
     { href: "/merch", title: "Merch", subtitle: "", icon: "/merch.svg", external: false },
     { href: youtubeUrl, title: "YouTube", subtitle: "", icon: "/youtube.svg", external: true },
@@ -14,10 +14,10 @@ export default function Home() {
   ];
 
   return (
-    <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full place-items-center">
+    <main className="relative z-10 w-full h-full flex items-center justify-center px-8 sm:px-12 lg:px-16 py-20">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-12 lg:gap-16 max-w-6xl w-full place-items-center">
         {tiles.map((tile) => {
-          const tileClasses = `glass block aspect-square p-1 sm:p-2 ${
+          const tileClasses = `glass block p-1 sm:p-2 ${
             tile.static 
               ? "opacity-60" 
               : "tile-glow tile-button group hover:scale-110 active:scale-95"
@@ -55,7 +55,7 @@ export default function Home() {
 
           if (tile.static) {
             return (
-              <div key={tile.title} className={tileClasses} style={{ width: 'calc(100% - 40px)', height: 'calc(100% - 40px)' }}>
+              <div key={tile.title} className={tileClasses} style={{ width: '220px', height: '220px', borderWidth: '8px' }}>
                 {tileContent}
               </div>
             );
@@ -68,7 +68,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className={tileClasses}
-              style={{ width: 'calc(100% - 40px)', height: 'calc(100% - 40px)' }}
+              style={{ width: '220px', height: '220px', borderWidth: '8px' }}
             >
               {tileContent}
             </a>
@@ -77,7 +77,7 @@ export default function Home() {
               key={tile.title}
               href={tile.href}
               className={tileClasses}
-              style={{ width: 'calc(100% - 40px)', height: 'calc(100% - 40px)' }}
+              style={{ width: '220px', height: '220px', borderWidth: '8px' }}
             >
               {tileContent}
             </Link>
