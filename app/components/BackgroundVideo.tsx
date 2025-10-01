@@ -168,11 +168,24 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
 
   return (
     <div className="relative h-full w-full">
-      {/* Current video */}
+      {/* Next video (behind current video) */}
+      {nextVideo && (
+        <video
+          ref={nextVideoRef}
+          key={nextVideo}
+          className="absolute inset-0 h-full w-full object-cover opacity-0 z-0"
+          muted
+          playsInline
+          loop={false}
+          src={`/bg/${nextVideo}`}
+        />
+      )}
+      
+      {/* Current video (on top) */}
       <video
         ref={currentVideoRef}
         key={currentVideo}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover z-10"
         muted
         playsInline
         autoPlay
@@ -180,19 +193,6 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         poster="/bg-poster.jpg"
         src={`/bg/${currentVideo}`}
       />
-      
-      {/* Next video (always loaded behind current) */}
-      {nextVideo && (
-        <video
-          ref={nextVideoRef}
-          key={nextVideo}
-          className="absolute inset-0 h-full w-full object-cover opacity-0"
-          muted
-          playsInline
-          loop={false}
-          src={`/bg/${nextVideo}`}
-        />
-      )}
     </div>
   );
 }
