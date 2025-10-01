@@ -37,29 +37,28 @@ export default function RootLayout({
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>
 
-        {/* Floating brand logo */}
-        <header className="fixed top-0 left-0 right-0 z-10">
-          <div className="mx-auto max-w-6xl px-4 py-8">
-            <div className="flex justify-center">
-              <Link href="/" className="inline-flex items-center gap-4 text-white hover:opacity-80 transition-opacity">
-                <Image src="/oo.svg" alt="Overdrive Originals" width={64} height={64} />
-                <span className="text-2xl font-bold tracking-wide">Overdrive Originals</span>
-              </Link>
-            </div>
+        {/* Floating brand logo - viewport top */}
+        <header className="fixed top-8 left-0 right-0 z-10">
+          <div className="flex justify-center">
+            <Link href="/" className="text-white hover:opacity-80 transition-opacity">
+              <Image src="/oo.svg" alt="Overdrive Originals" width={192} height={192} />
+            </Link>
           </div>
         </header>
 
-        {/* Page content with spacing for header */}
-        <div className="pt-24">{children}</div>
+        {/* Page content - full viewport height */}
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1 flex items-center justify-center pt-32 pb-32">
+            {children}
+          </div>
+        </div>
 
-        {/* Footer */}
-        <footer className="relative z-10 mt-24">
-          <div className="mx-auto max-w-6xl px-4 pb-10">
-            <div className="text-center text-white/70 text-sm leading-relaxed">
-              © {new Date().getFullYear()} Overdrive Originals by Esse Werks. All rights reserved.
-              <br />
-              This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
-            </div>
+        {/* Footer - viewport bottom */}
+        <footer className="fixed bottom-8 left-0 right-0 z-10">
+          <div className="text-center text-white/70 text-sm leading-relaxed px-4">
+            © {new Date().getFullYear()} Overdrive Originals by Esse Werks. All rights reserved.
+            <br />
+            This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
           </div>
         </footer>
       </body>

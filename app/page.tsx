@@ -29,9 +29,9 @@ export default function Home() {
               >
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   {tile.icon ? (
-                    <Image src={tile.icon} alt="" width={48} height={48} className="opacity-90 mb-4" />
+                    <Image src={tile.icon} alt="" width={120} height={120} className="opacity-90 mb-4" />
                   ) : (
-                    <div className="h-12 w-12 rounded-md bg-white/20 mb-4" />
+                    <div className="h-30 w-30 rounded-md bg-white/20 mb-4" />
                   )}
                   <div className="text-white font-bold text-lg tracking-wide mb-1">{tile.title}</div>
                   <div className="text-white/60 text-xs">{tile.subtitle}</div>
@@ -45,9 +45,9 @@ export default function Home() {
               >
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   {tile.icon ? (
-                    <Image src={tile.icon} alt="" width={48} height={48} className="opacity-90 mb-4" />
+                    <Image src={tile.icon} alt="" width={120} height={120} className="opacity-90 mb-4" />
                   ) : (
-                    <div className="h-12 w-12 rounded-md bg-white/20 mb-4" />
+                    <div className="h-30 w-30 rounded-md bg-white/20 mb-4" />
                   )}
                   <div className="text-white font-bold text-lg tracking-wide mb-1">{tile.title}</div>
                   <div className="text-white/60 text-xs">{tile.subtitle}</div>
