@@ -18,12 +18,12 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
   // Available videos (you can add more as needed)
   const availableVideos = ['bg_01.mp4', 'bg_02.mp4', 'bg_03.mp4', 'bg_04.mp4', 'bg_05.mp4'];
 
-  // Get next video to play
-  const getNextVideo = () => {
-    // Always pick a random video from all available videos
-    // This ensures infinite rotation with random selection
-    const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-    console.log('Selected random video:', randomVideo, 'from available:', availableVideos);
+  // Get next video to play (avoiding the current video)
+  const getNextVideo = (currentVideoName: string) => {
+    // Filter out the current video to avoid immediate repeats
+    const otherVideos = availableVideos.filter(video => video !== currentVideoName);
+    const randomVideo = otherVideos[Math.floor(Math.random() * otherVideos.length)];
+    console.log('Selected next video:', randomVideo, 'avoiding current:', currentVideoName);
     return randomVideo;
   };
 
@@ -58,8 +58,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       // The next video is now the current video
       setCurrentVideo(nextVideoName);
       
-      // Get the next video after this one
-      const nextNextVideo = getNextVideo();
+      // Get the next video after this one (avoiding the current video)
+      const nextNextVideo = getNextVideo(nextVideoName);
       setNextVideo(nextNextVideo);
       console.log('Next video after crossfade:', nextNextVideo);
       
@@ -86,8 +86,8 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         video.currentTime = 0;
         video.play().catch(console.error);
         
-        // Pre-load the next video
-        const nextVideoName = getNextVideo();
+        // Pre-load the next video (avoiding the current video)
+        const nextVideoName = getNextVideo(currentVideo);
         setNextVideo(nextVideoName);
         console.log('Current video loaded:', currentVideo, 'Next video prepared:', nextVideoName);
       };
