@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 sm:gap-12 lg:gap-16 max-w-6xl w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12 sm:gap-16 lg:gap-20 max-w-6xl w-full">
         {tiles.map((tile) => (
           tile.external ? (
             <a
@@ -23,7 +23,8 @@ export default function Home() {
               href={tile.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`glass group block aspect-square p-1 sm:p-2 transition-all duration-300 hover:bg-white/25 hover:scale-110 hover:shadow-2xl active:scale-95 ${tile.comingSoon ? "opacity-60" : ""}`}
+              className={`glass group block aspect-square p-1 sm:p-2 transition-all duration-300 hover:bg-white/25 hover:scale-110 hover:shadow-2xl active:scale-95 border border-black ${tile.comingSoon ? "opacity-60" : ""}`}
+              style={{ width: 'calc(100% - 40px)', height: 'calc(100% - 40px)' }}
             >
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="text-4xl sm:text-5xl lg:text-6xl mb-2 sm:mb-3 filter drop-shadow-lg transition-transform duration-300 group-hover:scale-110">
@@ -43,7 +44,8 @@ export default function Home() {
             <Link
               key={tile.title}
               href={tile.href}
-              className={`glass group block aspect-square p-1 sm:p-2 transition-all duration-300 hover:bg-white/25 hover:scale-110 hover:shadow-2xl active:scale-95 ${tile.comingSoon ? "opacity-60" : ""}`}
+              className={`glass group block aspect-square p-1 sm:p-2 transition-all duration-300 hover:bg-white/25 hover:scale-110 hover:shadow-2xl active:scale-95 border border-black ${tile.comingSoon ? "opacity-60" : ""}`}
+              style={{ width: 'calc(100% - 40px)', height: 'calc(100% - 40px)' }}
             >
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="text-4xl sm:text-5xl lg:text-6xl mb-2 sm:mb-3 filter drop-shadow-lg transition-transform duration-300 group-hover:scale-110">

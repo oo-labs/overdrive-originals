@@ -93,6 +93,20 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       return;
     }
     
+    // Ensure the next video is properly positioned and styled
+    nextVideoRef.current.style.position = 'absolute';
+    nextVideoRef.current.style.top = '0';
+    nextVideoRef.current.style.left = '0';
+    nextVideoRef.current.style.width = '100%';
+    nextVideoRef.current.style.height = '100%';
+    nextVideoRef.current.style.objectFit = 'cover';
+    nextVideoRef.current.style.opacity = '0';
+    nextVideoRef.current.style.zIndex = '0';
+    nextVideoRef.current.style.willChange = 'opacity';
+    nextVideoRef.current.style.transform = 'translateZ(0)';
+    nextVideoRef.current.style.backfaceVisibility = 'hidden';
+    nextVideoRef.current.style.isolation = 'isolate';
+    
     console.log('🔄 Starting crossfade with preloaded video');
     setIsCrossfading(true);
     
