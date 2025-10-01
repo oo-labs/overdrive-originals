@@ -25,8 +25,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Smooth fade for media */
-video { filter: saturate(1.05) contrast(1.05); }
+/* Smooth fade for media with GPU acceleration */
+video { 
+  filter: saturate(1.05) contrast(1.05);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+}
 
 /* Utility: glass card default look (can be applied additionally) */
 .glass {

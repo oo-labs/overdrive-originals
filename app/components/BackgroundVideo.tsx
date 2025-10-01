@@ -70,9 +70,13 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       nextVideoElement.currentTime = 0;
       nextVideoElement.play().catch(console.error);
       
-      // Set up crossfade transitions
+      // Set up crossfade transitions with GPU acceleration
       currentVideoElement.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
       nextVideoElement.style.transition = `opacity ${crossfadeDuration}s ease-in-out`;
+      
+      // Force GPU acceleration
+      currentVideoElement.style.willChange = 'opacity';
+      nextVideoElement.style.willChange = 'opacity';
       
       // Start fade out of current video and fade in of next video
       currentVideoElement.style.opacity = '0';
@@ -108,14 +112,16 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
       setIsCrossfading(false);
       crossfadeTimeoutRef.current = null;
       
-      // Reset styles
+      // Reset styles and clean up GPU acceleration
       if (currentVideoRef.current) {
         currentVideoRef.current.style.opacity = '1';
         currentVideoRef.current.style.transition = '';
+        currentVideoRef.current.style.willChange = 'auto';
       }
       if (nextVideoRef.current) {
         nextVideoRef.current.style.opacity = '0';
         nextVideoRef.current.style.transition = '';
+        nextVideoRef.current.style.willChange = 'auto';
       }
     }, crossfadeDuration * 1000);
   };
@@ -229,6 +235,11 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
           playsInline
           loop={false}
           preload="auto"
+          style={{ 
+            willChange: 'opacity',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}
           src={`/bg/${nextVideo}`}
         />
       )}
@@ -244,6 +255,11 @@ export default function BackgroundVideo({ videoDuration, crossfadeDuration }: Ba
         loop={false}
         preload="auto"
         poster="/bg-poster.jpg"
+        style={{ 
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}
         src={`/bg/${currentVideo}`}
       />
     </div>
