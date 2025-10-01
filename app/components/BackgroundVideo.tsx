@@ -98,36 +98,32 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
     nextVideo.style.transition = `opacity ${crossfadeDuration}s ease-in`;
     nextVideo.style.opacity = '1';
     
-    // After fade completes, swap videos
+    // After fade completes, prepare for next transition
     setTimeout(() => {
-      console.log('✅ Transition complete, swapping videos');
-      
-      // Swap video sources
-      const tempSrc = currentVideo.src;
-      currentVideo.src = nextVideo.src;
-      nextVideo.src = tempSrc;
+      console.log('✅ Transition complete, preparing next video');
       
       // Reset styles
       currentVideo.style.transition = '';
-      currentVideo.style.opacity = '1';
+      currentVideo.style.opacity = '0'; // Keep faded video hidden
       nextVideo.style.transition = '';
-      nextVideo.style.opacity = '0';
+      nextVideo.style.opacity = '1'; // Keep new video visible
       
       // Update index
       setCurrentVideoIndex(nextIndex);
       setIsTransitioning(false);
       
-      // Load next video for next transition
+      // Load next video for next transition (don't swap srcs)
       const nextNextIndex = (nextIndex + 1) % videoSources.length;
-      nextVideo.src = videoSources[nextNextIndex];
-      nextVideo.load();
+      currentVideo.src = videoSources[nextNextIndex];
+      currentVideo.load();
       
     }, crossfadeDuration * 1000);
   }, [currentVideoIndex, videoSources, crossfadeDuration, isTransitioning]);
 
   // Handle video events
   useEffect(() => {
-    const currentVideo = video1Ref.current;
+    // The visible video is always video2 after the first transition
+    const currentVideo = currentVideoIndex === 0 ? video1Ref.current : video2Ref.current;
     if (!currentVideo || isPreloading) return;
     
     const handleTimeUpdate = () => {
@@ -160,7 +156,7 @@ export default function BackgroundVideo({ crossfadeDuration }: BackgroundVideoPr
       currentVideo.removeEventListener('ended', handleEnded);
       currentVideo.removeEventListener('error', handleError);
     };
-  }, [isPreloading, startTransition, isTransitioning]);
+  }, [isPreloading, startTransition, isTransitioning, currentVideoIndex]);
 
   return (
     <div className="relative h-full w-full">
