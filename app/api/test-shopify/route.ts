@@ -47,11 +47,11 @@ export async function GET() {
           productCount: response.data?.products?.edges?.length || 0,
           error: null
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.push({
           version,
           success: false,
-          error: error.message || 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     }
@@ -61,10 +61,10 @@ export async function GET() {
       accessTokenLength: accessToken.length,
       results
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ 
-      error: error.message || 'Unknown error',
-      stack: error.stack 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 }
