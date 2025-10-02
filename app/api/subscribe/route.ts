@@ -15,12 +15,13 @@ const SMTP_PASS = process.env.SMTP_PASS;
 interface SubscriptionData {
   email: string;
   instagram?: string;
+  source?: 'race-support' | 'about';
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: SubscriptionData = await request.json();
-    const { email, instagram } = body;
+    const { email, instagram, source = 'race-support' } = body;
 
     // Validate email
     if (!email || !email.includes('@')) {
@@ -39,6 +40,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Determine tags based on source
+    const tags = source === 'about' 
+      ? ['Overdrive Originals', 'Website Signup']
+      : ['Race Support', 'Website Signup'];
+
     // Add subscriber to Mailchimp
     const mailchimpUrl = `https://${MAILCHIMP_SERVER_PREFIX}.api.mailchimp.com/3.0/lists/${MAILCHIMP_AUDIENCE_ID}/members`;
     
@@ -48,7 +54,7 @@ export async function POST(request: NextRequest) {
       merge_fields: {
         ...(instagram && { INSTAGRAM: instagram })
       },
-      tags: ['Race Support', 'Website Signup']
+      tags: tags
     };
 
     const mailchimpResponse = await fetch(mailchimpUrl, {
@@ -81,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Send notification email
     if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
       try {
-        await sendNotificationEmail(email, instagram);
+        await sendNotificationEmail(email, instagram, source);
       } catch (emailError) {
         console.error('Failed to send notification email:', emailError);
         // Don't fail the request if email notification fails
@@ -108,7 +114,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function sendNotificationEmail(email: string, instagram?: string) {
+async function sendNotificationEmail(email: string, instagram?: string, source: string = 'race-support') {
   const nodemailer = require('nodemailer');
 
   const transporter = nodemailer.createTransporter({
@@ -122,32 +128,34 @@ async function sendNotificationEmail(email: string, instagram?: string) {
   });
 
   const instagramText = instagram ? `Instagram: @${instagram}` : 'No Instagram handle provided';
+  const sourceText = source === 'about' ? 'About Page' : 'Race Support Page';
+  const subjectText = source === 'about' ? 'New About Page Subscriber' : 'New Race Support Subscriber';
 
   const mailOptions = {
     from: SMTP_USER,
     to: NOTIFICATION_EMAIL,
-    subject: '🏎️ New Race Support Subscriber - Overdrive Originals',
+    subject: `🏎️ ${subjectText} - Overdrive Originals`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #06b6d4;">🏎️ New Race Support Subscriber!</h2>
+        <h2 style="color: #06b6d4;">🏎️ ${subjectText}!</h2>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #333;">Subscriber Details:</h3>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>${instagramText}</strong></p>
-          <p><strong>Source:</strong> Race Support Page</p>
+          <p><strong>Source:</strong> ${sourceText}</p>
           <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
         </div>
         
         <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; border-left: 4px solid #06b6d4;">
-          <p style="margin: 0;"><strong>Action Required:</strong> New subscriber has been added to the Race Support Mailchimp list and tagged appropriately.</p>
+          <p style="margin: 0;"><strong>Action Required:</strong> New subscriber has been added to the Mailchimp list and tagged appropriately.</p>
         </div>
         
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
         
         <p style="color: #666; font-size: 14px;">
           This notification was sent automatically from the Overdrive Originals website.<br>
-          <a href="https://overdriveoriginals.com/race-support" style="color: #06b6d4;">View Race Support Page</a>
+          <a href="https://overdriveoriginals.com/${source === 'about' ? 'about' : 'race-support'}" style="color: #06b6d4;">View ${sourceText}</a>
         </p>
       </div>
     `,

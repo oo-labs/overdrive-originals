@@ -25,13 +25,14 @@ export default function RaceSupport() {
         body: JSON.stringify({
           email: email.trim(),
           instagram: instagram.trim() || undefined,
+          source: 'race-support',
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message || 'Successfully joined the insider list!');
+        setMessage('🎉 Welcome to the revolution! Thank you for sharing your info with us. You\'re now part of the exclusive Race Support insider community and will be the first to know about build updates, voting opportunities, and behind-the-scenes content.');
         setEmail('');
         setInstagram('');
       } else {
@@ -151,10 +152,14 @@ export default function RaceSupport() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full glass px-6 py-3 border border-cyan-400/50 text-white hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 border border-green-500 text-white transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-lg hover:shadow-xl"
                 >
                   {isSubmitting ? 'Joining...' : 'Join the Revolution'}
                 </button>
+                
+                <p className="text-xs text-white/60 text-center mt-3">
+                  We respect your privacy. Your information will only be used to send you exclusive Race Support updates and will never be shared with third parties. You can unsubscribe at any time.
+                </p>
               </form>
             </div>
             </div>
