@@ -6,28 +6,38 @@ export default function About() {
       <div className="max-w-4xl w-full">
         <div className="glass p-8 sm:p-12 border border-black">
           <div className="text-center mb-8">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-              About
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+              We Are the Storytellers of the Automotive Soul.
             </h1>
-            <p className="text-white/80 text-lg sm:text-xl">
-              Learn more about Overdrive Originals
-            </p>
           </div>
           
           <div className="text-white/90 text-base sm:text-lg leading-relaxed space-y-6">
             <p>
-              Overdrive Originals is an independent content studio dedicated to creating 
-              high-quality automotive content and supporting the racing community.
+              Some people see cars as appliances. A to B. Pointless hunks of metal. We see them differently. 
+              We see the late nights in the garage, the busted knuckles, the smell of race fuel, and the 
+              relentless pursuit of perfection. We see the stories etched in every dent, every modification, 
+              every mile marker.
             </p>
             
             <p>
-              Our mission is to document and share the passion for automotive excellence, 
-              from race support to custom builds and everything in between.
+              Overdrive Originals was born from this obsession. We're not just a content studio; we're a 
+              global community of builders, dreamers, and drivers who believe that a car can be more than 
+              just a machine. It can be a work of art, a statement of identity, a vessel for adventure.
             </p>
             
             <p>
-              Through our various projects including Race Support and Second Chance Customs, 
-              we aim to showcase the artistry and engineering that goes into every build.
+              We're here to tell the stories that matter. The stories of the underdogs who build champions 
+              in their home garages. The stories of the legends who push the limits of what's possible. 
+              The stories that remind us why we fell in love with cars in the first place.
+            </p>
+            
+            <p>
+              This isn't just about cars. It's about the culture that surrounds them. It's about the passion 
+              that unites us. It's about the drive to create something extraordinary.
+            </p>
+            
+            <p className="text-xl sm:text-2xl font-semibold text-white">
+              Join us. Let's tell your story.
             </p>
           </div>
           
