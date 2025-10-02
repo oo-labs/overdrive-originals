@@ -98,17 +98,28 @@ const GET_PRODUCTS_QUERY = `
 `;
 
 export async function getProducts(count: number = 12): Promise<ShopifyProduct[]> {
+  console.log('Shopify configuration check:', {
+    storeDomain: SHOPIFY_STORE_DOMAIN,
+    hasToken: !!SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+    isConfigured: isShopifyConfigured,
+    hasClient: !!client
+  });
+
   if (!isShopifyConfigured || !client) {
     console.log('Shopify not configured, returning empty products array');
     return [];
   }
 
   try {
+    console.log('Attempting to fetch products from Shopify...');
     const response = await client.request<ShopifyProductsResponse>(GET_PRODUCTS_QUERY, {
       variables: { first: count },
     });
 
-    return response.data?.products?.edges?.map(edge => edge.node) || [];
+    console.log('Shopify response:', response);
+    const products = response.data?.products?.edges?.map(edge => edge.node) || [];
+    console.log('Products found:', products.length);
+    return products;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
