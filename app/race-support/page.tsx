@@ -1,6 +1,50 @@
+'use client';
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function RaceSupport() {
+  const [email, setEmail] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage('');
+    setIsError(false);
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          instagram: instagram.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message || 'Successfully joined the insider list!');
+        setEmail('');
+        setInstagram('');
+      } else {
+        setMessage(data.error || 'Something went wrong. Please try again.');
+        setIsError(true);
+      }
+    } catch (error) {
+      setMessage('Network error. Please check your connection and try again.');
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4 py-4">
       <div className="max-w-4xl w-full flex flex-col" style={{ height: 'calc(100vh - clamp(160px, 20vh, 240px))' }}>
@@ -71,27 +115,45 @@ export default function RaceSupport() {
             
             <div className="bg-black/50 p-6 rounded-lg border border-white/30">
               <h3 className="text-xl font-bold text-white mb-4 text-center">Join the Insider&apos;s List</h3>
-              <form className="space-y-4">
+              
+              {message && (
+                <div className={`mb-4 p-3 rounded-lg border ${
+                  isError 
+                    ? 'bg-red-900/20 border-red-500/30 text-red-200' 
+                    : 'bg-green-900/20 border-green-500/30 text-green-200'
+                }`}>
+                  {message}
+                </div>
+              )}
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <input 
                     type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
                     className="w-full px-4 py-3 bg-black/30 border border-white/30 rounded text-white placeholder-white/60 focus:border-cyan-400 focus:outline-none transition-colors"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
                   <input 
                     type="text" 
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
                     placeholder="Instagram handle (optional)"
                     className="w-full px-4 py-3 bg-black/30 border border-white/30 rounded text-white placeholder-white/60 focus:border-cyan-400 focus:outline-none transition-colors"
+                    disabled={isSubmitting}
                   />
                 </div>
                 <button 
                   type="submit"
-                  className="w-full glass px-6 py-3 border border-cyan-400/50 text-white hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300 font-semibold"
+                  disabled={isSubmitting}
+                  className="w-full glass px-6 py-3 border border-cyan-400/50 text-white hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Join the Revolution
+                  {isSubmitting ? 'Joining...' : 'Join the Revolution'}
                 </button>
               </form>
             </div>
