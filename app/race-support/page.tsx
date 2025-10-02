@@ -52,7 +52,7 @@ export default function RaceSupport() {
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold text-white mb-2">Member-Only Q&As:</h4>
+                  <h4 className="font-semibold text-white mb-2">Participate in the conversation and community:</h4>
                   <p className="text-white/80">
                     Get your questions answered directly by our master builders and engineers in our 
                     private, members-only forums.
@@ -84,7 +84,7 @@ export default function RaceSupport() {
                 <div>
                   <input 
                     type="text" 
-                    placeholder="Your name (optional)"
+                    placeholder="Instagram handle (optional)"
                     className="w-full px-4 py-3 bg-black/30 border border-white/30 rounded text-white placeholder-white/60 focus:border-cyan-400 focus:outline-none transition-colors"
                   />
                 </div>
