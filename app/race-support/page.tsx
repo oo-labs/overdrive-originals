@@ -97,9 +97,11 @@ export default function RaceSupport() {
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold text-white mb-2">Join the Conversation:</h4>
+                  <h4 className="font-semibold text-white mb-2">Access the Raw & Uncut Feed:</h4>
                   <p className="text-white/80">
-                    Participate in the community and discussion about this unique build.
+                    Go beyond the polished YouTube cuts. As an insider, you&apos;ll get access to the unedited video logs, 
+                    the build team&apos;s photo dumps, and the schematic sketches straight from the whiteboard. See the real 
+                    moments—the challenges, the debates, and the breakthroughs—that never make it to the main channel.
                   </p>
                 </div>
               </div>
