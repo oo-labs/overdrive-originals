@@ -59,9 +59,13 @@ export default function StorePage() {
                   <div className="text-white/70 text-lg mb-4">
                     Store coming soon!
                   </div>
-                  <p className="text-white/60">
+                  <p className="text-white/60 mb-4">
                     We&apos;re setting up parts, merch, and build-related items. Check back soon!
                   </p>
+                  <div className="text-white/50 text-sm bg-black/20 p-4 rounded-lg border border-white/10">
+                    <p className="mb-2">For store owners:</p>
+                    <p>Make sure your products are published and available for sale in your Shopify admin.</p>
+                  </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
