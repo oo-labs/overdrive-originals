@@ -137,10 +137,10 @@ export default function RootLayout({
                     ║                                                                                                   ║
                     ║  Hey there, curious developer! 👋                                                                ║
                     ║                                                                                                   ║
-                    ║  You found this because you're the kind of person who digs into the source code,                ║
-                    ║  and that's exactly the type of curiosity we love at Overdrive Originals!                       ║
+                    ║  You found this because you are the kind of person who digs into the source code,               ║
+                    ║  and that is exactly the type of curiosity we love at Overdrive Originals!                      ║
                     ║                                                                                                   ║
-                    ║  We're an independent content studio where technology meets storytelling and automotive          ║
+                    ║  We are an independent content studio where technology meets storytelling and automotive         ║
                     ║  passion. Are you someone who gets excited about the intersection of code and creativity?       ║
                     ║                                                                                                   ║
                     ║  🎯 TWO PATHS FOR PASSIONATE DEVELOPERS:                                                          ║
@@ -162,12 +162,12 @@ export default function RootLayout({
                     ║  🎬 TELL US YOUR STORY:                                                                           ║
                     ║  1. Which path excites you more - storytelling or motorsports?                                   ║
                     ║  2. How do you blend technology with your passion?                                                ║
-                    ║  3. What's your automotive story? (Dream build? Track days? Content creation?)                  ║
+                    ║  3. What is your automotive story? (Dream build? Track days? Content creation?)                 ║
                     ║  4. How did you discover this easter egg? (View Source? DevTools? Pure curiosity?)              ║
                     ║                                                                                                   ║
-                    ║  Whether you're a developer, engineer, designer, content creator, or just someone who           ║
+                    ║  Whether you are a developer, engineer, designer, content creator, or just someone who          ║
                     ║  gets excited about the perfect merge of technology and automotive culture,                      ║
-                    ║  we'd love to hear from you!                                                                      ║
+                    ║  we would love to hear from you!                                                                  ║
                     ║                                                                                                   ║
                     ║  P.S. - This site was built with Next.js, TypeScript, and a lot of automotive passion.         ║
                     ║         The background videos? Those are real builds and stories in action! 🔧📹               ║
