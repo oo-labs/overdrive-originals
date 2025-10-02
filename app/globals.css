@@ -71,10 +71,26 @@ video {
   border: 0.64em solid rgba(255,255,255,0.2);
 }
 
-/* Ensure uniform grid spacing */
-.grid {
-  row-gap: var(--grid-gap);
-  column-gap: var(--grid-gap);
+/* Custom grid spacing - make horizontal gaps match vertical gaps and reduce them */
+@media (min-width: 1280px) {
+  .grid {
+    row-gap: 2rem;
+    column-gap: 2rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .grid {
+    row-gap: 1.5rem;
+    column-gap: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid {
+    row-gap: 1.25rem;
+    column-gap: 1.25rem;
+  }
 }
 
 /* Enhanced automotive button effect */
