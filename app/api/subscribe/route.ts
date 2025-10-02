@@ -121,9 +121,9 @@ async function sendNotificationEmail(email: string, instagram?: string, source: 
     return;
   }
   
-  const nodemailer = require('nodemailer');
+  const nodemailer = await import('nodemailer');
 
-  const transporter = nodemailer.createTransporter({
+  const transporter = nodemailer.default.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT),
     secure: SMTP_PORT === '465',

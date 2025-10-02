@@ -39,7 +39,7 @@ export default function RaceSupport() {
         setMessage(data.error || 'Something went wrong. Please try again.');
         setIsError(true);
       }
-    } catch (error) {
+    } catch {
       setMessage('Network error. Please check your connection and try again.');
       setIsError(true);
     } finally {
