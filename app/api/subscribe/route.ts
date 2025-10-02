@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
     if (!MAILCHIMP_API_KEY || !MAILCHIMP_AUDIENCE_ID || !MAILCHIMP_SERVER_PREFIX) {
       console.error('Missing Mailchimp configuration');
       return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
+        { error: 'Email subscription service is currently being configured. Please try again later.' },
+        { status: 503 }
       );
     }
 
@@ -115,6 +115,12 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendNotificationEmail(email: string, instagram?: string, source: string = 'race-support') {
+  // Skip email notification if SMTP not configured
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.log('SMTP not configured, skipping email notification');
+    return;
+  }
+  
   const nodemailer = require('nodemailer');
 
   const transporter = nodemailer.createTransporter({
