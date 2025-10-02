@@ -242,7 +242,7 @@ export default function RootLayout({
           {/* Footer - bottom of viewport with proper z-index */}
           <footer className="flex-shrink-0 z-10 pb-2 xs:pb-3 sm:pb-4 md:pb-6 lg:pb-8">
             <div className="text-center text-white/70 text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs leading-relaxed px-4">
-              © {new Date().getFullYear()} Overdrive Originals. All rights reserved.
+              © {new Date().getFullYear()} Overdrive Originals. All rights reserved. | hello@overdriveoriginals.com
               <br />
               This site participates in community-driven projects. All product names, logos, and brands are property of their respective owners.
             </div>
