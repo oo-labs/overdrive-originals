@@ -17,7 +17,7 @@ export default function Home() {
     <div className="relative z-10 w-full h-full flex items-center justify-center">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 xs:gap-5 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12 w-full place-items-center">
         {tiles.map((tile) => {
-          const tileClasses = `glass block p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 w-32 h-32 xs:w-36 xs:h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 border-2 xs:border-2.5 sm:border-3 md:border-4 lg:border-4 xl:border-5 ${
+          const tileClasses = `glass block p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 w-32 h-32 xs:w-36 xs:h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 ${
             tile.static 
               ? "opacity-60" 
               : "tile-glow tile-button group hover:scale-110 active:scale-95"

@@ -66,11 +66,15 @@ video {
   opacity: 1;
 }
 
+/* Tile border styling */
+.glass {
+  border: 1.7em solid rgba(255,255,255,0.2);
+}
+
 /* Enhanced automotive button effect */
 .tile-button {
   position: relative;
   background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
