@@ -60,7 +60,7 @@ export default function StorePage() {
                     Store coming soon!
                   </div>
                   <p className="text-white/60">
-                    We're setting up parts, merch, and build-related items. Check back soon!
+                    We&apos;re setting up parts, merch, and build-related items. Check back soon!
                   </p>
                 </div>
               ) : (

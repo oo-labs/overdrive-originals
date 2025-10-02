@@ -1,10 +1,17 @@
 import { createStorefrontApiClient } from '@shopify/storefront-api-client';
 
-const client = createStorefrontApiClient({
-  storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!,
+// Check if Shopify is configured
+const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
+const SHOPIFY_STOREFRONT_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+const isShopifyConfigured = SHOPIFY_STORE_DOMAIN && SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+// Only create client if Shopify is configured
+const client = isShopifyConfigured ? createStorefrontApiClient({
+  storeDomain: SHOPIFY_STORE_DOMAIN!,
   apiVersion: '2024-10',
-  publicAccessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
-});
+  publicAccessToken: SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
+}) : null;
 
 export interface ShopifyProduct {
   id: string;
@@ -91,6 +98,11 @@ const GET_PRODUCTS_QUERY = `
 `;
 
 export async function getProducts(count: number = 12): Promise<ShopifyProduct[]> {
+  if (!isShopifyConfigured || !client) {
+    console.log('Shopify not configured, returning empty products array');
+    return [];
+  }
+
   try {
     const response = await client.request<ShopifyProductsResponse>(GET_PRODUCTS_QUERY, {
       variables: { first: count },
