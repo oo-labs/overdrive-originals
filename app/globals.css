@@ -56,7 +56,7 @@ video {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+  background: linear-gradient(45deg, transparent, rgba(6, 182, 212, 0.1), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -75,11 +75,11 @@ video {
 }
 
 .tile-button:hover {
-  background: linear-gradient(145deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-  border-color: rgba(34, 197, 94, 0.4);
+  background: linear-gradient(145deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05));
+  border-color: rgba(6, 182, 212, 0.4);
   box-shadow: 
-    0 0 20px rgba(34, 197, 94, 0.3),
-    0 0 40px rgba(34, 197, 94, 0.1),
+    0 0 20px rgba(6, 182, 212, 0.3),
+    0 0 40px rgba(6, 182, 212, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
@@ -87,7 +87,7 @@ video {
 .tile-button:active {
   transform: translateY(0);
   box-shadow: 
-    0 0 10px rgba(34, 197, 94, 0.4),
+    0 0 10px rgba(6, 182, 212, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -103,11 +103,11 @@ video {
     invert(1) 
     sepia(1) 
     saturate(5) 
-    hue-rotate(90deg) 
+    hue-rotate(180deg) 
     brightness(1.2)
-    drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))
-    drop-shadow(0 0 16px rgba(34, 197, 94, 0.6))
-    drop-shadow(0 0 24px rgba(34, 197, 94, 0.4));
+    drop-shadow(0 0 8px rgba(6, 182, 212, 0.8))
+    drop-shadow(0 0 16px rgba(6, 182, 212, 0.6))
+    drop-shadow(0 0 24px rgba(6, 182, 212, 0.4));
 }
 
 .tile-subtitle {
@@ -121,11 +121,11 @@ video {
     invert(1) 
     sepia(1) 
     saturate(5) 
-    hue-rotate(90deg) 
+    hue-rotate(180deg) 
     brightness(1.2)
-    drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))
-    drop-shadow(0 0 16px rgba(34, 197, 94, 0.6))
-    drop-shadow(0 0 24px rgba(34, 197, 94, 0.4));
+    drop-shadow(0 0 8px rgba(6, 182, 212, 0.8))
+    drop-shadow(0 0 16px rgba(6, 182, 212, 0.6))
+    drop-shadow(0 0 24px rgba(6, 182, 212, 0.4));
 }
 
 /* Automotive SVG glow effect */
@@ -139,9 +139,9 @@ video {
     invert(1) 
     sepia(1) 
     saturate(5) 
-    hue-rotate(90deg) 
+    hue-rotate(180deg) 
     brightness(1.2)
-    drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))
-    drop-shadow(0 0 16px rgba(34, 197, 94, 0.6))
-    drop-shadow(0 0 24px rgba(34, 197, 94, 0.4));
+    drop-shadow(0 0 8px rgba(6, 182, 212, 0.8))
+    drop-shadow(0 0 16px rgba(6, 182, 212, 0.6))
+    drop-shadow(0 0 24px rgba(6, 182, 212, 0.4));
 }
