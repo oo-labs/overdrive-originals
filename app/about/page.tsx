@@ -20,24 +20,24 @@ export default function About() {
             </p>
             
             <p>
-              Overdrive Originals was born from this obsession. We're not just a content studio; we're a 
+              Overdrive Originals was born from this obsession. We&apos;re not just a content studio; we&apos;re a 
               global community of builders, dreamers, and drivers who believe that a car can be more than 
               just a machine. It can be a work of art, a statement of identity, a vessel for adventure.
             </p>
             
             <p>
-              We're here to tell the stories that matter. The stories of the underdogs who build champions 
-              in their home garages. The stories of the legends who push the limits of what's possible. 
+              We&apos;re here to tell the stories that matter. The stories of the underdogs who build champions 
+              in their home garages. The stories of the legends who push the limits of what&apos;s possible. 
               The stories that remind us why we fell in love with cars in the first place.
             </p>
             
             <p>
-              This isn't just about cars. It's about the culture that surrounds them. It's about the passion 
-              that unites us. It's about the drive to create something extraordinary.
+              This isn&apos;t just about cars. It&apos;s about the culture that surrounds them. It&apos;s about the passion 
+              that unites us. It&apos;s about the drive to create something extraordinary.
             </p>
             
             <p className="text-xl sm:text-2xl font-semibold text-white">
-              Join us. Let's tell your story.
+              Join us. Let&apos;s tell your story.
             </p>
           </div>
           
