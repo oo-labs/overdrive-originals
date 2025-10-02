@@ -8,15 +8,15 @@ Add these environment variables to your deployment platform (Vercel, Netlify, et
 ```
 MAILCHIMP_API_KEY=your_mailchimp_api_key_here
 MAILCHIMP_AUDIENCE_ID=your_mailchimp_audience_id_here
-MAILCHIMP_SERVER_PREFIX=us1
+MAILCHIMP_SERVER_PREFIX=us3
 ```
 
 ### Email Notification Configuration
 ```
-NOTIFICATION_EMAIL=easteregg@overdriveoriginals.com
+NOTIFICATION_EMAIL=studio@overdriveoriginals.com
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your_smtp_username@gmail.com
+SMTP_USER=overdriveoriginals@gmail.com
 SMTP_PASS=your_smtp_app_password
 ```
 
