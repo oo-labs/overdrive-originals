@@ -2,16 +2,19 @@ import Link from "next/link";
 
 export default function RaceSupport() {
   return (
-    <main className="relative z-10 w-full h-full flex items-center justify-center px-4">
-      <div className="max-w-4xl w-full">
-        <div className="glass p-8 sm:p-12 border border-black">
-          <div className="text-center mb-8">
+    <main className="relative z-10 w-full h-full flex items-center justify-center px-4 py-4">
+      <div className="max-w-4xl w-full h-full flex flex-col">
+        <div className="glass border border-black flex-1 flex flex-col min-h-0">
+          {/* Fixed header */}
+          <div className="flex-shrink-0 text-center p-8 sm:p-12 pb-4">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
               This Isn&apos;t a Project. It&apos;s a Revolution.
             </h1>
           </div>
           
-          <div className="text-white/90 text-base sm:text-lg leading-relaxed space-y-6">
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto content-scroll px-8 sm:px-12">
+            <div className="text-white/90 text-base sm:text-lg leading-relaxed space-y-6 pb-6">
             <p>
               Welcome to the inner circle. What you&apos;re about to witness is more than just a build. 
               It&apos;s the birth of a legend. The Esse Werks Shop Truck isn&apos;t just a vehicle; it&apos;s a 
@@ -93,9 +96,11 @@ export default function RaceSupport() {
                 </button>
               </form>
             </div>
+            </div>
           </div>
           
-          <div className="mt-8 text-center">
+          {/* Fixed footer */}
+          <div className="flex-shrink-0 text-center p-8 sm:p-12 pt-4">
             <Link 
               href="/" 
               className="inline-block glass px-6 py-3 border border-white/30 text-white hover:bg-white/10 transition-all duration-300"
