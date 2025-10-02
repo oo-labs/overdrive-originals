@@ -8,6 +8,7 @@ export default function Home() {
     { href: "/about", title: "About", subtitle: "", icon: "/about.svg", external: false },
     { href: "/race-support", title: "Race Support", subtitle: "Esse Werks Shop Build", icon: "/racesupport.svg", external: false },
     { href: "/second-chance-customs", title: "Second Chance", subtitle: "Coming Soon", icon: "/scc.svg", external: false, static: true },
+    { href: "/store", title: "Store", subtitle: "Parts & Merch", icon: "/merch.svg", external: false },
     { href: "/merch", title: "Merch", subtitle: "", icon: "/merch.svg", external: false },
     { href: youtubeUrl, title: "YouTube", subtitle: "", icon: "/youtube.svg", external: true },
     { href: instagramUrl, title: "Instagram", subtitle: "", icon: "/instagram.svg", external: true },
