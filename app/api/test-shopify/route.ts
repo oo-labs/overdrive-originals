@@ -45,6 +45,7 @@ export async function GET() {
           success: true,
           shopName: response.data?.shop?.name,
           productCount: response.data?.products?.edges?.length || 0,
+          fullResponse: response.data,
           error: null
         });
       } catch (error: unknown) {
