@@ -3,8 +3,8 @@ import Link from "next/link";
 export default function About() {
   return (
     <main className="relative z-10 w-full h-full flex items-center justify-center px-4 py-4">
-      <div className="max-w-4xl w-full h-full flex flex-col">
-        <div className="glass border border-black flex-1 flex flex-col min-h-0">
+      <div className="max-w-4xl w-full flex flex-col" style={{ height: 'calc(100vh - clamp(160px, 20vh, 240px))' }}>
+        <div className="glass border border-black flex-1 flex flex-col min-h-0 max-h-full">
           {/* Fixed header */}
           <div className="flex-shrink-0 text-center p-8 sm:p-12 pb-4">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
