@@ -77,6 +77,14 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      // Handle deleted email case
+      if (mailchimpResult.title === 'Forgotten Email Not Subscribed') {
+        return NextResponse.json(
+          { error: 'This email was previously unsubscribed and cannot be re-added automatically. Please use a different email address or contact us directly.' },
+          { status: 400 }
+        );
+      }
+      
       console.error('Mailchimp error:', mailchimpResult);
       return NextResponse.json(
         { error: 'Failed to subscribe to mailing list' },
@@ -87,16 +95,24 @@ export async function POST(request: NextRequest) {
     // Send notification email
     if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
       try {
+        console.log('Attempting to send notification email...');
         await sendNotificationEmail(email, instagram, source);
+        console.log('Notification email sent successfully');
       } catch (emailError) {
         console.error('Failed to send notification email:', emailError);
         // Don't fail the request if email notification fails
       }
+    } else {
+      console.log('SMTP not configured:', { SMTP_HOST: !!SMTP_HOST, SMTP_USER: !!SMTP_USER, SMTP_PASS: !!SMTP_PASS });
     }
+
+    const successMessage = source === 'about' 
+      ? 'Successfully subscribed to the Overdrive Originals community!'
+      : 'Successfully subscribed to the Race Support insider list!';
 
     return NextResponse.json(
       { 
-        message: 'Successfully subscribed to the Race Support insider list!',
+        message: successMessage,
         subscriber: {
           email: mailchimpResult.email_address,
           status: mailchimpResult.status

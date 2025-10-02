@@ -85,6 +85,18 @@ export default function About() {
                 Join us. Let&apos;s tell your story.
               </p>
               
+              <div className="text-center mt-6 p-4 bg-black/20 rounded-lg border border-white/10">
+                <p className="text-white/80 text-sm">
+                  Want to get in touch? Reach us at{' '}
+                  <a 
+                    href="mailto:hello@overdriveoriginals.com" 
+                    className="text-cyan-400 hover:text-cyan-300 transition-colors underline"
+                  >
+                    hello@overdriveoriginals.com
+                  </a>
+                </p>
+              </div>
+              
               {/* Email signup form */}
               <div className="bg-black/50 p-6 rounded-lg border border-white/30 mt-8">
                 <h3 className="text-xl font-bold text-white mb-4 text-center">Stay Connected</h3>
