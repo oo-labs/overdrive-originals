@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getProducts, ShopifyProduct } from '../../lib/shopify';
 import ProductCard from '../components/ProductCard';
+import StoreBackgroundVideo from '../components/StoreBackgroundVideo';
 
 export default function StorePage() {
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
@@ -27,7 +28,9 @@ export default function StorePage() {
   }, []);
 
   return (
-    <main className="relative z-10 w-full h-full flex items-center justify-center px-4 py-4">
+    <>
+      <StoreBackgroundVideo />
+      <main className="relative z-10 w-full h-full flex items-center justify-center px-4 py-4">
       <div className="max-w-7xl w-full flex flex-col" style={{ height: 'calc(100vh - clamp(160px, 20vh, 240px))' }}>
         <div className="glass border border-black flex-1 flex flex-col min-h-0 max-h-full">
           {/* Fixed header */}
@@ -87,8 +90,9 @@ export default function StorePage() {
             </Link>
           </div>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 
