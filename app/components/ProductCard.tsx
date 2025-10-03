@@ -22,13 +22,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="glass border border-white/20 rounded-xl overflow-hidden group hover:border-cyan-400/50 transition-all duration-300">
-      <div className="aspect-square relative overflow-hidden">
+      <div className="aspect-square relative overflow-hidden bg-gray-800">
         <Image
           src={imageUrl}
           alt={imageAlt}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => {
+            console.error('Image failed to load:', imageUrl);
+            e.currentTarget.src = '/placeholder-product.jpg';
+          }}
         />
       </div>
       

@@ -136,7 +136,10 @@ export function formatPrice(amount: string, currencyCode: string): string {
 }
 
 export function getProductImageUrl(product: ShopifyProduct): string {
-  return product.images.edges[0]?.node.url || '/placeholder-product.jpg';
+  const imageUrl = product.images.edges[0]?.node.url;
+  console.log(`Product "${product.title}" image URL:`, imageUrl);
+  console.log(`Product "${product.title}" images array:`, product.images.edges);
+  return imageUrl || '/placeholder-product.jpg';
 }
 
 export function getProductImageAlt(product: ShopifyProduct): string {
