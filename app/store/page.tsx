@@ -9,12 +9,14 @@ export default function StorePage() {
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [enabledCollections, setEnabledCollections] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
         const fetchedProducts = await getProducts(12);
         setProducts(fetchedProducts);
+        setEnabledCollections(getEnabledCollections());
       } catch (err) {
         setError('Failed to load products. Please try again later.');
         console.error('Error fetching products:', err);
@@ -38,9 +40,11 @@ export default function StorePage() {
             <p className="text-white/80 text-lg">
               Parts, merch, and build-related items for automotive enthusiasts
             </p>
-            <div className="mt-4 text-white/60 text-sm">
-              Showing products from: {getEnabledCollections().join(', ')}
-            </div>
+            {enabledCollections.length > 0 && (
+              <div className="mt-4 text-white/60 text-sm">
+                Showing products from: {enabledCollections.join(', ')}
+              </div>
+            )}
           </div>
           
           {/* Scrollable content */}

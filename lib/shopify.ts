@@ -10,7 +10,7 @@ const isShopifyConfigured = SHOPIFY_STORE_DOMAIN && SHOPIFY_STOREFRONT_ACCESS_TO
 // Only create client if Shopify is configured
 const client = isShopifyConfigured ? createStorefrontApiClient({
   storeDomain: SHOPIFY_STORE_DOMAIN!,
-  apiVersion: '2024-10',
+  apiVersion: '2025-01',
   publicAccessToken: SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
 }) : null;
 
@@ -123,6 +123,9 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
     const enabledCollections = collectionsConfig.enabledCollections;
     const collectionHandles = enabledCollections.map(collectionNameToHandle);
     
+    console.log('Fetching products for collections:', enabledCollections);
+    console.log('Collection handles:', collectionHandles);
+    
     const response = await client.request(GET_PRODUCTS_BY_COLLECTIONS_QUERY, {
       variables: { 
         first: count,
@@ -131,29 +134,44 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
       },
     });
 
+    console.log('Shopify API response:', response);
+
     // Extract products from enabled collections only
     const allProducts: ShopifyProduct[] = [];
     
     if (response.data?.collections?.edges) {
+      console.log('Found collections:', response.data.collections.edges.length);
+      
       for (const collectionEdge of response.data.collections.edges) {
         const collection = collectionEdge.node;
+        console.log(`Collection: ${collection.title} (${collection.handle})`);
         
         // Only include products from enabled collections
         if (collectionHandles.includes(collection.handle) && collection.products?.edges) {
+          console.log(`Found ${collection.products.edges.length} products in ${collection.title}`);
           for (const productEdge of collection.products.edges) {
             allProducts.push(productEdge.node);
           }
+        } else {
+          console.log(`Skipping collection ${collection.title} - not in enabled list or no products`);
         }
       }
     }
+
+    console.log(`Total products found: ${allProducts.length}`);
 
     // Remove duplicates based on product ID
     const uniqueProducts = allProducts.filter((product, index, self) => 
       index === self.findIndex(p => p.id === product.id)
     );
 
+    console.log(`Unique products after deduplication: ${uniqueProducts.length}`);
+
     // Limit to requested count
-    return uniqueProducts.slice(0, count);
+    const finalProducts = uniqueProducts.slice(0, count);
+    console.log(`Returning ${finalProducts.length} products`);
+    
+    return finalProducts;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
