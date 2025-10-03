@@ -2,21 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getProducts, ShopifyProduct, getEnabledCollections } from '../../lib/shopify';
+import { getProducts, ShopifyProduct } from '../../lib/shopify';
 import ProductCard from '../components/ProductCard';
 
 export default function StorePage() {
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [enabledCollections, setEnabledCollections] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
         const fetchedProducts = await getProducts(12);
         setProducts(fetchedProducts);
-        setEnabledCollections(getEnabledCollections());
       } catch (err) {
         setError('Failed to load products. Please try again later.');
         console.error('Error fetching products:', err);
@@ -40,11 +38,6 @@ export default function StorePage() {
             <p className="text-white/80 text-lg">
               Parts, merch, and build-related items for automotive enthusiasts
             </p>
-            {enabledCollections.length > 0 && (
-              <div className="mt-4 text-white/60 text-sm">
-                Showing products from: {enabledCollections.join(', ')}
-              </div>
-            )}
           </div>
           
           {/* Scrollable content */}
@@ -72,7 +65,6 @@ export default function StorePage() {
                   <div className="text-white/50 text-sm bg-black/20 p-4 rounded-lg border border-white/10">
                     <p className="mb-2">For store owners:</p>
                     <p>Make sure your products are published and available for sale in your Shopify admin.</p>
-                    <p className="mt-2">Current collections: {enabledCollections.join(', ')}</p>
                   </div>
                 </div>
               ) : (

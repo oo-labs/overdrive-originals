@@ -56,60 +56,9 @@ export interface ShopifyProductsResponse {
   };
 }
 
-const GET_PRODUCTS_BY_COLLECTIONS_QUERY = `
-  query getProductsByCollections($first: Int!, $sortKey: ProductSortKeys!, $reverse: Boolean!) {
-    collections(first: 10) {
-      edges {
-        node {
-          id
-          title
-          handle
-          products(first: $first, sortKey: $sortKey, reverse: $reverse) {
-            edges {
-              node {
-                id
-                title
-                handle
-                description
-                images(first: 5) {
-                  edges {
-                    node {
-                      url
-                      altText
-                    }
-                  }
-                }
-                priceRange {
-                  minVariantPrice {
-                    amount
-                    currencyCode
-                  }
-                }
-                variants(first: 5) {
-                  edges {
-                    node {
-                      id
-                      title
-                      price {
-                        amount
-                        currencyCode
-                      }
-                      availableForSale
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const GET_ALL_PRODUCTS_QUERY = `
-  query getAllProducts($first: Int!, $sortKey: ProductSortKeys!, $reverse: Boolean!) {
-    products(first: $first, sortKey: $sortKey, reverse: $reverse) {
+const GET_PRODUCTS_QUERY = `
+  query getProducts($first: Int!) {
+    products(first: $first) {
       edges {
         node {
           id
@@ -161,101 +110,18 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
   }
 
   try {
-    // Get enabled collections from config
-    const enabledCollections = collectionsConfig.enabledCollections;
-    const collectionHandles = enabledCollections.map(collectionNameToHandle);
+    console.log('Fetching all products from Shopify...');
     
-    console.log('Fetching products for collections:', enabledCollections);
-    console.log('Collection handles:', collectionHandles);
-    
-    const response = await client.request(GET_PRODUCTS_BY_COLLECTIONS_QUERY, {
-      variables: { 
-        first: count,
-        sortKey: collectionsConfig.displaySettings.sortBy,
-        reverse: collectionsConfig.displaySettings.sortOrder === 'DESC'
-      },
+    const response = await client.request<ShopifyProductsResponse>(GET_PRODUCTS_QUERY, {
+      variables: { first: count },
     });
 
-    console.log('Shopify API response:', response);
-
-    // Extract products from enabled collections only
-    const allProducts: ShopifyProduct[] = [];
-    const foundCollections: string[] = [];
-    const emptyCollections: string[] = [];
+    console.log('Shopify API response received');
     
-    if (response.data?.collections?.edges) {
-      console.log('Found collections:', response.data.collections.edges.length);
-      
-      for (const collectionEdge of response.data.collections.edges) {
-        const collection = collectionEdge.node;
-        console.log(`Collection: ${collection.title} (${collection.handle})`);
-        
-        // Only include products from enabled collections
-        if (collectionHandles.includes(collection.handle)) {
-          if (collection.products?.edges && collection.products.edges.length > 0) {
-            console.log(`Found ${collection.products.edges.length} products in ${collection.title}`);
-            foundCollections.push(collection.title);
-            for (const productEdge of collection.products.edges) {
-              allProducts.push(productEdge.node);
-            }
-          } else {
-            console.log(`Collection ${collection.title} exists but has no products`);
-            emptyCollections.push(collection.title);
-          }
-        } else {
-          console.log(`Skipping collection ${collection.title} - not in enabled list`);
-        }
-      }
-    }
+    const products = response.data?.products?.edges?.map(edge => edge.node) || [];
+    console.log(`Found ${products.length} products`);
     
-    // Log summary
-    if (foundCollections.length > 0) {
-      console.log(`✅ Found products in: ${foundCollections.join(', ')}`);
-    }
-    if (emptyCollections.length > 0) {
-      console.log(`⚠️ Empty collections: ${emptyCollections.join(', ')}`);
-    }
-    if (foundCollections.length === 0) {
-      console.log(`❌ No products found in any enabled collections`);
-    }
-
-    console.log(`Total products found: ${allProducts.length}`);
-
-    // Remove duplicates based on product ID
-    const uniqueProducts = allProducts.filter((product, index, self) => 
-      index === self.findIndex(p => p.id === product.id)
-    );
-
-    console.log(`Unique products after deduplication: ${uniqueProducts.length}`);
-
-    // If no products found in enabled collections, try to get all products as fallback
-    if (uniqueProducts.length === 0) {
-      console.log('No products found in enabled collections, trying fallback to get all products...');
-      
-      try {
-        const fallbackResponse = await client.request(GET_ALL_PRODUCTS_QUERY, {
-          variables: { 
-            first: count,
-            sortKey: collectionsConfig.displaySettings.sortBy,
-            reverse: collectionsConfig.displaySettings.sortOrder === 'DESC'
-          },
-        });
-        
-        if (fallbackResponse.data?.products?.edges) {
-          const fallbackProducts = fallbackResponse.data.products.edges.map(edge => edge.node);
-          console.log(`Fallback found ${fallbackProducts.length} products`);
-          return fallbackProducts.slice(0, count);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback query also failed:', fallbackError);
-      }
-    }
-
-    // Limit to requested count
-    const finalProducts = uniqueProducts.slice(0, count);
-    console.log(`Returning ${finalProducts.length} products`);
-    
-    return finalProducts;
+    return products;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
