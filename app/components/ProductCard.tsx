@@ -22,7 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="glass border border-white/20 rounded-xl overflow-hidden group hover:border-cyan-400/50 transition-all duration-300">
-      <div className="aspect-square relative overflow-hidden bg-gray-800">
+      <div className="aspect-square relative overflow-hidden">
         <Image
           src={imageUrl}
           alt={imageAlt}
