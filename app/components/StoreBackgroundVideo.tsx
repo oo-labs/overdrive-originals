@@ -43,7 +43,8 @@ export default function StoreBackgroundVideo() {
           poster="/bg-poster.jpg"
           style={{
             zIndex: 1,
-            opacity: isLoaded ? 0.3 : 0, // Dimmed to 30% opacity
+            opacity: isLoaded ? 1 : 0,
+            filter: 'brightness(0.3) contrast(1.2)', // Darken video instead of using opacity
             willChange: 'opacity',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
