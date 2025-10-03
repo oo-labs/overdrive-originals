@@ -118,10 +118,21 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
 
     console.log('Shopify API response received');
     
-    const products = response.data?.products?.edges?.map(edge => edge.node) || [];
-    console.log(`Found ${products.length} products`);
+    const allProducts = response.data?.products?.edges?.map(edge => edge.node) || [];
+    console.log(`Found ${allProducts.length} total products`);
     
-    return products;
+    // Filter out products without images
+    const productsWithImages = allProducts.filter(product => {
+      const hasImages = product.images.edges && product.images.edges.length > 0;
+      if (!hasImages) {
+        console.log(`Filtering out product "${product.title}" - no images`);
+      }
+      return hasImages;
+    });
+    
+    console.log(`Found ${productsWithImages.length} products with images`);
+    
+    return productsWithImages;
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
