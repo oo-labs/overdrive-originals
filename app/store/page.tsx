@@ -13,7 +13,7 @@ export default function StorePage() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const fetchedProducts = await getProducts(12);
+        const fetchedProducts = await getProducts(50);
         setProducts(fetchedProducts);
       } catch (err) {
         setError('Failed to load products. Please try again later.');

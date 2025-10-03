@@ -117,15 +117,28 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
     });
 
     console.log('Shopify API response received');
+    console.log('Full response:', JSON.stringify(response, null, 2));
     
     const allProducts = response.data?.products?.edges?.map(edge => edge.node) || [];
     console.log(`Found ${allProducts.length} total products`);
+    
+    // Debug each product
+    allProducts.forEach((product, index) => {
+      console.log(`Product ${index + 1}: "${product.title}"`);
+      console.log(`  - Images count: ${product.images.edges?.length || 0}`);
+      console.log(`  - Images array:`, product.images.edges);
+      if (product.images.edges && product.images.edges.length > 0) {
+        console.log(`  - First image URL: ${product.images.edges[0]?.node.url}`);
+      }
+    });
     
     // Filter out products without images
     const productsWithImages = allProducts.filter(product => {
       const hasImages = product.images.edges && product.images.edges.length > 0;
       if (!hasImages) {
-        console.log(`Filtering out product "${product.title}" - no images`);
+        console.log(`❌ Filtering out product "${product.title}" - no images`);
+      } else {
+        console.log(`✅ Keeping product "${product.title}" - has ${product.images.edges.length} images`);
       }
       return hasImages;
     });
