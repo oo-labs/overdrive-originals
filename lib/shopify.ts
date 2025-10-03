@@ -107,6 +107,48 @@ const GET_PRODUCTS_BY_COLLECTIONS_QUERY = `
   }
 `;
 
+const GET_ALL_PRODUCTS_QUERY = `
+  query getAllProducts($first: Int!, $sortKey: ProductSortKeys!, $reverse: Boolean!) {
+    products(first: $first, sortKey: $sortKey, reverse: $reverse) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          images(first: 5) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          variants(first: 5) {
+            edges {
+              node {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
+                }
+                availableForSale
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 // Helper function to convert collection names to handles
 function collectionNameToHandle(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -138,6 +180,8 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
 
     // Extract products from enabled collections only
     const allProducts: ShopifyProduct[] = [];
+    const foundCollections: string[] = [];
+    const emptyCollections: string[] = [];
     
     if (response.data?.collections?.edges) {
       console.log('Found collections:', response.data.collections.edges.length);
@@ -147,15 +191,32 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
         console.log(`Collection: ${collection.title} (${collection.handle})`);
         
         // Only include products from enabled collections
-        if (collectionHandles.includes(collection.handle) && collection.products?.edges) {
-          console.log(`Found ${collection.products.edges.length} products in ${collection.title}`);
-          for (const productEdge of collection.products.edges) {
-            allProducts.push(productEdge.node);
+        if (collectionHandles.includes(collection.handle)) {
+          if (collection.products?.edges && collection.products.edges.length > 0) {
+            console.log(`Found ${collection.products.edges.length} products in ${collection.title}`);
+            foundCollections.push(collection.title);
+            for (const productEdge of collection.products.edges) {
+              allProducts.push(productEdge.node);
+            }
+          } else {
+            console.log(`Collection ${collection.title} exists but has no products`);
+            emptyCollections.push(collection.title);
           }
         } else {
-          console.log(`Skipping collection ${collection.title} - not in enabled list or no products`);
+          console.log(`Skipping collection ${collection.title} - not in enabled list`);
         }
       }
+    }
+    
+    // Log summary
+    if (foundCollections.length > 0) {
+      console.log(`✅ Found products in: ${foundCollections.join(', ')}`);
+    }
+    if (emptyCollections.length > 0) {
+      console.log(`⚠️ Empty collections: ${emptyCollections.join(', ')}`);
+    }
+    if (foundCollections.length === 0) {
+      console.log(`❌ No products found in any enabled collections`);
     }
 
     console.log(`Total products found: ${allProducts.length}`);
@@ -166,6 +227,29 @@ export async function getProducts(count: number = 12): Promise<ShopifyProduct[]>
     );
 
     console.log(`Unique products after deduplication: ${uniqueProducts.length}`);
+
+    // If no products found in enabled collections, try to get all products as fallback
+    if (uniqueProducts.length === 0) {
+      console.log('No products found in enabled collections, trying fallback to get all products...');
+      
+      try {
+        const fallbackResponse = await client.request(GET_ALL_PRODUCTS_QUERY, {
+          variables: { 
+            first: count,
+            sortKey: collectionsConfig.displaySettings.sortBy,
+            reverse: collectionsConfig.displaySettings.sortOrder === 'DESC'
+          },
+        });
+        
+        if (fallbackResponse.data?.products?.edges) {
+          const fallbackProducts = fallbackResponse.data.products.edges.map(edge => edge.node);
+          console.log(`Fallback found ${fallbackProducts.length} products`);
+          return fallbackProducts.slice(0, count);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+      }
+    }
 
     // Limit to requested count
     const finalProducts = uniqueProducts.slice(0, count);
