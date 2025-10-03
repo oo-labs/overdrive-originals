@@ -1,0 +1,11 @@
+{
+  "enabledCollections": [
+    "Race Support",
+    "Overdrive Originals"
+  ],
+  "displaySettings": {
+    "maxProducts": 12,
+    "sortBy": "CREATED_AT",
+    "sortOrder": "DESC"
+  }
+}

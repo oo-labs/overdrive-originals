@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getProducts, ShopifyProduct } from '../../lib/shopify';
+import { getProducts, ShopifyProduct, getEnabledCollections } from '../../lib/shopify';
 import ProductCard from '../components/ProductCard';
 
 export default function StorePage() {
@@ -38,6 +38,9 @@ export default function StorePage() {
             <p className="text-white/80 text-lg">
               Parts, merch, and build-related items for automotive enthusiasts
             </p>
+            <div className="mt-4 text-white/60 text-sm">
+              Showing products from: {getEnabledCollections().join(', ')}
+            </div>
           </div>
           
           {/* Scrollable content */}
